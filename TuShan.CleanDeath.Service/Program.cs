@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TuShan.BountyHunterDream.Logger;
 
-namespace TuShan.BountyHunterDream.Service
+namespace TuShan.CleanDeath.Service
 {
     internal static class Program
     {
@@ -19,7 +19,7 @@ namespace TuShan.BountyHunterDream.Service
             TLog.Configure($"{AppDomain.CurrentDomain.BaseDirectory}../Conf/Factory/log4net-Service.config");
             ServicesToRun = new ServiceBase[]
             {
-                new SupervisionService()
+                new CleanDeathService()
             };
             ServiceBase.Run(ServicesToRun);
         }

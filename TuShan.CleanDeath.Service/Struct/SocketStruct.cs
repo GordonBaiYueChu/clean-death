@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TuShan.BountyHunterDream.Service.Struct
+namespace TuShan.CleanDeath.Service.Struct
 {
     /// <summary>
     /// 请求

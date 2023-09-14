@@ -1,16 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Documents;
+using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
+using TuShan.BountyHunterDream.Logger;
 using TuShan.BountyHunterDream.Setting;
 using TuShan.BountyHunterDream.Setting.Setting;
 using TuShan.BountyHunterDream.Setting.Struct;
+using TuShan.CleanDeath.Helps;
 using TuShan.CleanDeath.Models;
 
 namespace TuShan.CleanDeath.ViewModels
 {
     public class MainWindowViewModel : Caliburn.Micro.Screen
     {
+
+        public MainWindowViewModel()
+        {
+            SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+        }
 
         private ObservableCollection<CleanFolderModel> _cleanFolders = new ObservableCollection<CleanFolderModel>();
 
@@ -168,5 +176,31 @@ namespace TuShan.CleanDeath.ViewModels
             CleanFolders = new ObservableCollection<CleanFolderModel>(newList);
         }
 
+        public void StartGuard()
+        {
+            //启动服务 服务感知不到windows的锁屏，现在用的内存也不大，暂时用应用程序
+            //ServiceUtility.StartService();
+            //this.TryCloseAsync();
+        }
+
+        public void ViewModelClosed()
+        {
+            SystemEvents.SessionSwitch -= SystemEvents_SessionSwitch;
+        }
+
+        public void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+        {
+            switch (e.Reason)
+            {
+                case SessionSwitchReason.SessionLock:
+                    break;
+                case SessionSwitchReason.SessionUnlock:
+                    break;
+                case SessionSwitchReason.SessionLogon:
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

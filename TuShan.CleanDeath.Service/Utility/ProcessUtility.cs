@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TuShan.BountyHunterDream.Logger;
-using TuShan.BountyHunterDream.Service.Struct;
+using TuShan.CleanDeath.Service.Struct;
 
-namespace TuShan.BountyHunterDream.Service.Utility
+namespace TuShan.CleanDeath.Service.Utility
 {
     /// <summary>
     /// 进程管理

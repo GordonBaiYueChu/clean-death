@@ -1,6 +1,6 @@
-﻿namespace TuShan.BountyHunterDream.Service
+﻿namespace TuShan.CleanDeath.Service
 {
-    partial class SupervisionService
+    partial class CleanDeathService
     {
         /// <summary> 
         /// 必需的设计器变量。
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            this.ServiceName = "Service1";
+            this.ServiceName = "CleanDeathService";
         }
 
         #endregion

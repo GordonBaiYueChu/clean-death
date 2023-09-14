@@ -5,10 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TuShan.CleanDeath.Views"
         mc:Ignorable="d"
+        Title="名誉权守护系统"
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         Height="450"
-        Width="800">
+        Width="800"
+        cal:Action.Target="[Closed]=[ViewModelClosed]">
     <Window.Resources>
         <Style TargetType="Button"
                BasedOn="{StaticResource ButtonPrimary}">
@@ -31,7 +33,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Border Margin="5"
                 Grid.Row="0">
@@ -40,6 +42,7 @@
                                HorizontalAlignment="Left"
                                VerticalAlignment="Top"
                                Interval="0:0:0.125"
+                               hc:FloatingBlock.Content="Good"
                                Columns="8"
                                Rows="10"
                                StartColumn="0"
@@ -49,93 +52,183 @@
                                Width="110"
                                Height="128"
                                IsPlaying="true" />
-                <Grid Margin="10"
-                      Width="600">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="配置监护文件夹地址："
-                               Grid.Row="0"></TextBlock>
-                    <DataGrid x:Name="CleanFolders"
-                              Grid.Row="1"
-                              SelectedItem="{Binding SelectedCleanFolderItem}"
-                              Width="Auto"
-                              Height="Auto"
-                              IsReadOnly="False"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              cal:Message.Attach="[Loaded]=[CleanFoldersLoaded()]">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="监护地址"
-                                                    Width="3.5*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock HorizontalAlignment="Left"
-                                                   Text="{Binding CleanFolderPath}"></TextBlock>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Width="0.8*"
-                                                    Header="选择地址">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid HorizontalAlignment="Left">
-                                            <ToggleButton ToolTip="请选择需要监控的文件夹"
-                                                          cal:Message.Attach="[Click]=[SelectedFolder()]"
-                                                          hc:IconElement.Geometry="{StaticResource DragHorizontalGeometry}"
-                                                          Foreground="{DynamicResource PrimaryBrush}" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Width="0.8*"
-                                                    Header="启用">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsEnable}"
-                                                  cal:Message.Attach="[Checked]=[UseOnActiveChecked($source,$eventArgs)];[Unchecked]=[UseOnActiveChecked($source,$eventArgs)]" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Width="0.8*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid HorizontalAlignment="Center"
-                                              VerticalAlignment="Center">
-                                            <Button Style="{DynamicResource CloseImageButton}"
-                                                    Width="Auto"
-                                                    Height="Auto"
-                                                    cal:Message.Attach="[Click]=[DeleteSelectedFolder()]"
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <StackPanel Grid.Row="2"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center">
-                        <Button cal:Message.Attach="[Click]=[AddCleanFolderEvent()]"
-                                Content="添加"
-                                Margin="5,5"
-                                Width="Auto" />
-                        <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
-                                Content="保存"
-                                Margin="25,5"
-                                Width="Auto" />
-                    </StackPanel>
-                </Grid>
-
+                <TabControl Margin="10"
+                            TabStripPlacement="Top"
+                            Style="{StaticResource TabControlCapsuleSolid}">
+                    <TabItem Header="文件夹设置">
+                        <Grid Margin="10"
+                              Width="600">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <DataGrid x:Name="CleanFolders"
+                                      Grid.Row="1"
+                                      SelectedItem="{Binding SelectedCleanFolderItem}"
+                                      Width="Auto"
+                                      Height="Auto"
+                                      IsReadOnly="False"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      cal:Message.Attach="[Loaded]=[CleanFoldersLoaded()]">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="守护文件夹地址"
+                                                            Width="5*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock HorizontalAlignment="Left"
+                                                           Text="{Binding CleanFolderPath}"></TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="1*"
+                                                            Header="选择地址">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid HorizontalAlignment="Left">
+                                                    <ToggleButton ToolTip="请选择需要监控的文件夹"
+                                                                  cal:Message.Attach="[Click]=[SelectedFolder()]"
+                                                                  hc:IconElement.Geometry="{StaticResource DragHorizontalGeometry}"
+                                                                  Foreground="{DynamicResource PrimaryBrush}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="1*"
+                                                            Header="启用">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsEnable}"
+                                                          cal:Message.Attach="[Checked]=[UseOnActiveChecked($source,$eventArgs)];[Unchecked]=[UseOnActiveChecked($source,$eventArgs)]" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="1*"
+                                                            Header="删除">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center">
+                                                    <Button Style="{DynamicResource CloseImageButton}"
+                                                            Width="Auto"
+                                                            Height="Auto"
+                                                            cal:Message.Attach="[Click]=[DeleteSelectedFolder()]"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <Button cal:Message.Attach="[Click]=[AddCleanFolderEvent()]"
+                                        Content="添加"
+                                        hc:FloatingBlock.Content="添加"
+                                        Margin="5,5"
+                                        Width="Auto" />
+                                <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
+                                        Content="保存"
+                                        hc:FloatingBlock.Content="保存"
+                                        Margin="25,5"
+                                        Width="Auto" />
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="浏览器设置">
+                        <Grid Margin="10"
+                              Width="600">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="配置监护文件夹地址："
+                                       Grid.Row="0"></TextBlock>
+                            <DataGrid x:Name="CleanBrowsers"
+                                      Grid.Row="1"
+                                      SelectedItem="{Binding SelectedCleanFolderItem}"
+                                      Width="Auto"
+                                      Height="Auto"
+                                      IsReadOnly="False"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      cal:Message.Attach="[Loaded]=[CleanFoldersLoaded()]">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="监护地址"
+                                                            Width="3.5*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock HorizontalAlignment="Left"
+                                                           Text="{Binding CleanFolderPath}"></TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="0.8*"
+                                                            Header="选择地址">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid HorizontalAlignment="Left">
+                                                    <ToggleButton ToolTip="请选择需要监控的文件夹"
+                                                                  cal:Message.Attach="[Click]=[SelectedFolder()]"
+                                                                  hc:IconElement.Geometry="{StaticResource DragHorizontalGeometry}"
+                                                                  Foreground="{DynamicResource PrimaryBrush}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="0.8*"
+                                                            Header="启用">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsEnable}"
+                                                          cal:Message.Attach="[Checked]=[UseOnActiveChecked($source,$eventArgs)];[Unchecked]=[UseOnActiveChecked($source,$eventArgs)]" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="0.8*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center">
+                                                    <Button Style="{DynamicResource CloseImageButton}"
+                                                            Width="Auto"
+                                                            Height="Auto"
+                                                            cal:Message.Attach="[Click]=[DeleteSelectedFolder()]"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <Button cal:Message.Attach="[Click]=[AddCleanFolderEvent()]"
+                                        Content="添加"
+                                        hc:FloatingBlock.Content="添加"
+                                        Margin="5,5"
+                                        Width="Auto" />
+                                <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
+                                        Content="保存"
+                                        hc:FloatingBlock.Content="保存"
+                                        Margin="25,5"
+                                        Width="Auto" />
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
             </StackPanel>
         </Border>
         <Border Grid.Row="1"
                 Margin="5"
                 BorderBrush="{StaticResource DarkInfoBrush}"
-                BorderThickness="1">
+                BorderThickness="0,1">
             <StackPanel>
                 <hc:NumericUpDown Width="150"
                                   Height="30"
@@ -145,8 +238,9 @@
                                   hc:InfoElement.TitlePlacement="Left"
                                   hc:InfoElement.Title="检测间隔(天):"
                                   Style="{StaticResource NumericUpDownPlus}" />
-                <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
+                <Button cal:Message.Attach="[Click]=[StartGuard()]"
                         Content="开始守护你的底裤"
+                        hc:FloatingBlock.Content="要留清白在人间"
                         Margin="25,5"
                         Width="Auto" />
             </StackPanel>

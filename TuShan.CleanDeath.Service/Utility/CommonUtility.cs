@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Linq;
 using System.Net.NetworkInformation;
 
-namespace TuShan.BountyHunterDream.Service.Utility
+namespace TuShan.CleanDeath.Service.Utility
 {
     public class CommonUtility
     {

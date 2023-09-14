@@ -26,7 +26,7 @@ namespace TuShan.CleanDeath
             });
             //MessageBox.Show("111111111");
             //启动服务
-            //ServiceUtility.StartService();
+            ServiceUtility.StopService();
             //初始化服务客户端
             //ServiceClientUtility.InitClient();
 

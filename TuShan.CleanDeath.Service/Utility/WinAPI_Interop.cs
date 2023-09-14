@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TuShan.BountyHunterDream.Service.Utility
+namespace TuShan.CleanDeath.Service.Utility
 {
     public class WinAPI_Interop
     {

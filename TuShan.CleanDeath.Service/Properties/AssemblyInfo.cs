@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("TuShan.BountyHunterDream.Service")]
+[assembly: AssemblyTitle("TuShan.CleanDeath.Service")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("P R C")]
-[assembly: AssemblyProduct("TuShan.BountyHunterDream.Service")]
+[assembly: AssemblyProduct("TuShan.CleanDeath.Service")]
 [assembly: AssemblyCopyright("Copyright © P R C 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("88296ead-5416-481b-a08b-f1b8db98c259")]
+[assembly: Guid("0c0a9c15-b574-4a98-9812-e34b91c8362f")]
 
 // 程序集的版本信息由下列四个值组成: 
 //
