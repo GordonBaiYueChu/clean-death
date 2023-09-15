@@ -19,17 +19,16 @@ namespace TuShan.CleanDeath
             //配置日志文件信息
             TLog.Configure("../Conf/Factory/log4net.config");
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+            //设置工作目录
+            System.IO.Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
             Task.Run(() =>
             {
                 //阻止自动休眠
                 OperateWindows.PreventAutoSleep();
             });
             //MessageBox.Show("111111111");
-            //启动服务
+            //关闭可能存在的服务
             ServiceUtility.StopService();
-            //初始化服务客户端
-            //ServiceClientUtility.InitClient();
-
             base.OnStartup(e);
         }
 

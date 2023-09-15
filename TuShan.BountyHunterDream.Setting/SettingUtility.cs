@@ -52,6 +52,32 @@ namespace TuShan.BountyHunterDream.Setting
             }
         }
 
+
+        /// <summary>
+        /// 保存配置文件带路径
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// 不需要替换对象，直接保存文件即可
+        /// 1.当导入时，需要保存导入的值到文件中，并拷贝要导入的值放进内存中。
+        public static void SaveTSetting<T>(T t, string path, bool isUpdateCache = false) where T : BaseSetting<T>, new()
+        {
+            bool isExist = true;
+            string jsonName = t.GetType().Name;
+            if (!_cacheSetting.ContainsKey(jsonName))
+            {
+                isExist = false;
+                _cacheSetting.Add(jsonName, t);
+            }
+            T cache = _cacheSetting[jsonName] as T;
+            SaveCache<T>(t, ref cache, path, path);
+            if (isUpdateCache && isExist && t != null)
+            {
+                AddUpdateCache(t, jsonName);
+            }
+        }
+
+
         /// <summary>
         /// 保存配置对象，对象为空则保存原来的对象。
         /// </summary>
@@ -96,11 +122,20 @@ namespace TuShan.BountyHunterDream.Setting
         private static T GetTSetting<T>(Func<bool> uselast = null, Func<bool> usefactory = null, bool reload = false, string path = "") where T : BaseSetting<T>, new()
         {
             string fileName = typeof(T).Name;
-            string confFileName = basePath + fileName + ExName;
-            string confBackFileName = basePath + fileName + BackExName;
-            string confFacFileName = factoryPath + fileName + FacExName;
+            if (string.IsNullOrEmpty(path))
+            {
+                string confFileName = basePath + fileName + ExName;
+                string confBackFileName = basePath + fileName + BackExName;
+                string confFacFileName = factoryPath + fileName + FacExName;
 
-            return GetCacheTFromJson<T>(reload, fileName, confFileName, confBackFileName, confFacFileName, uselast, usefactory);
+                return GetCacheTFromJson<T>(reload, fileName, confFileName, confBackFileName, confFacFileName, uselast, usefactory);
+            }
+            else
+            {
+
+                return GetCacheTFromJson<T>(reload, fileName, path, path, path, uselast, usefactory);
+
+            }
         }
 
         private static T GetCacheTFromJson<T>(bool reload, string fileName, string path, string lastpath, string factorypath, Func<bool> uselast = null, Func<bool> usefactory = null) where T : BaseSetting<T>, new()

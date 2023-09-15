@@ -25,5 +25,10 @@ namespace TuShan.BountyHunterDream.Setting.Setting
         /// 最大超时时间（天）
         /// </summary>
         public int MaxTimeOutDay { get; set; } 
+
+        /// <summary>
+        /// 需要执行清楚的时间点
+        /// </summary>
+        public DateTime NeedCleanTime { get; set; }
     }
 }

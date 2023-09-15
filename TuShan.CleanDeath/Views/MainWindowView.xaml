@@ -228,7 +228,7 @@
         <Border Grid.Row="1"
                 Margin="5"
                 BorderBrush="{StaticResource DarkInfoBrush}"
-                BorderThickness="0,1">
+                BorderThickness="0,1,0,0">
             <StackPanel>
                 <hc:NumericUpDown Width="150"
                                   Height="30"

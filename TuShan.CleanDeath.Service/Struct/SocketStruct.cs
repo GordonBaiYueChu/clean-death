@@ -11,7 +11,7 @@ namespace TuShan.CleanDeath.Service.Struct
     /// </summary>
     public class RequestStruct
     {
-        public string ProcessID { get; set; }
+        public string ProcessPath { get; set; }
         public SocketEnum SocketEnum { get; set; }
         public Type ArgsType { get; set; }
         public string ArgsJson { get; set; }

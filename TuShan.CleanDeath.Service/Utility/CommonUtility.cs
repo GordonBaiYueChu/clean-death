@@ -32,11 +32,11 @@ namespace TuShan.CleanDeath.Service.Utility
         public static int GetConfigPort(string portKey, bool isServer)
         {
             ExeConfigurationFileMap filemap = new ExeConfigurationFileMap();
-            filemap.ExeConfigFilename = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.BountyHunterDream.Service.exe.config";//配置文件路径
+            filemap.ExeConfigFilename = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.CleanDeath.Service.exe.config";//配置文件路径
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(filemap, ConfigurationUserLevel.None);
             if (!AppSettingsKeyExists(portKey, config))
             {
-                config.AppSettings.Settings[portKey].Value = GetFreePort(45557).ToString();
+                config.AppSettings.Settings[portKey].Value = GetFreePort(45559).ToString();
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
             }

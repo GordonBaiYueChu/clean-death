@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Documents;
 using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
@@ -17,7 +20,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         public MainWindowViewModel()
         {
-            SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
         }
 
         private ObservableCollection<CleanFolderModel> _cleanFolders = new ObservableCollection<CleanFolderModel>();
@@ -174,33 +176,27 @@ namespace TuShan.CleanDeath.ViewModels
                 cleanDeathSetting.CleanFolders.Add(structCleanFolder);
             }
             CleanFolders = new ObservableCollection<CleanFolderModel>(newList);
+            SettingUtility.SaveTSetting(cleanDeathSetting);
         }
 
         public void StartGuard()
         {
-            //启动服务 服务感知不到windows的锁屏，现在用的内存也不大，暂时用应用程序
-            //ServiceUtility.StartService();
-            //this.TryCloseAsync();
-        }
+            //更新检测时间
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
+            cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
+            SettingUtility.SaveTSetting(cleanDeathSetting);
 
-        public void ViewModelClosed()
-        {
-            SystemEvents.SessionSwitch -= SystemEvents_SessionSwitch;
-        }
-
-        public void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
-        {
-            switch (e.Reason)
+            Task.Run(() =>
             {
-                case SessionSwitchReason.SessionLock:
-                    break;
-                case SessionSwitchReason.SessionUnlock:
-                    break;
-                case SessionSwitchReason.SessionLogon:
-                    break;
-                default:
-                    break;
-            }
+                ServiceUtility.StartService();
+                //初始化服务客户端
+                ServiceClientUtility.InitClient();
+                Thread.Sleep(1000);
+                this.TryCloseAsync();
+            });
+
         }
+  
     }
 }
