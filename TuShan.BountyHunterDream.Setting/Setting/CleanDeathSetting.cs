@@ -13,13 +13,13 @@ namespace TuShan.BountyHunterDream.Setting.Setting
         public CleanDeathSetting()
         {
             CleanFolders = new List<StructCleanFolder>();
-            Browsers = new List<StructBrowser>();
+            WindowApps = new List<StructBrowser>();
         }
 
         public List<StructCleanFolder> CleanFolders { get; set; }
 
 
-        public List<StructBrowser> Browsers { get; set; }
+        public List<StructBrowser> WindowApps { get; set; }
 
         /// <summary>
         /// 最大超时时间（天）

@@ -1,0 +1,12 @@
+{
+  "$id": "1",
+  "AllCustomAppData": [
+    {
+      "$id": "2",
+      "AppExeName": "firefox.exe",
+      "AppDisplayName": "Firefox",
+      "AppFilePath":"C:\\Program Files\\Mozilla Firefox",
+      "UnInstallString":"C:\\Program Files\\Mozilla Firefox\\uninstall\\helper.exe"
+    }
+  ]
+}

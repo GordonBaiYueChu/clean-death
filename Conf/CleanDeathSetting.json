@@ -1,0 +1,13 @@
+{
+  "$id": "1",
+  "CleanFolders": [
+    {
+      "$id": "2",
+      "FolderPath": "D:\\cleandeath\\cleandeathold",
+      "IsEnable": true
+    }
+  ],
+  "WindowApps": [],
+  "MaxTimeOutDay": 1,
+  "NeedCleanTime": "2023-09-16 15:37:44"
+}
