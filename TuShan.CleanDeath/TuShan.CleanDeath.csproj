@@ -120,8 +120,13 @@
     <Compile Include="Helps\ServiceClient.cs" />
     <Compile Include="Helps\Win32Help.cs" />
     <Compile Include="Models\AppRegistryModel.cs" />
+    <Compile Include="Models\CleanAppModel.cs" />
     <Compile Include="Models\CleanFolderModel.cs" />
+    <Compile Include="ViewModels\AppInfoViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Views\AppInfoView.xaml.cs">
+      <DependentUpon>AppInfoView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MainWindowView.xaml.cs">
       <DependentUpon>MainWindowView.xaml</DependentUpon>
     </Compile>
@@ -197,6 +202,10 @@
     <Page Include="Resource\Style\Theme\BaseLight.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AppInfoView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MainWindowView.xaml">
       <SubType>Designer</SubType>

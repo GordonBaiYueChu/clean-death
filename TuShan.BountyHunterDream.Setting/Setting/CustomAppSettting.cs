@@ -21,6 +21,6 @@ namespace TuShan.BountyHunterDream.Setting.Setting
         /// <summary>
         /// 所有用户自定义app参数
         /// </summary>
-        public List<CustomAppSetttingStruct> AllCustomAppData { get; set; }
+        public List<AppSetttingStruct> AllCustomAppData { get; set; }
     }
 }

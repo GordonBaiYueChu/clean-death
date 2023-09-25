@@ -13,13 +13,18 @@ namespace TuShan.BountyHunterDream.Setting.Setting
         public CleanDeathSetting()
         {
             CleanFolders = new List<StructCleanFolder>();
-            WindowApps = new List<StructBrowser>();
+            CleanApps = new List<AppSetttingStruct>();
         }
 
+        /// <summary>
+        /// 文件夹信息
+        /// </summary>
         public List<StructCleanFolder> CleanFolders { get; set; }
 
-
-        public List<StructBrowser> WindowApps { get; set; }
+        /// <summary>
+        /// windows应用
+        /// </summary>
+        public List<AppSetttingStruct> CleanApps { get; set; }
 
         /// <summary>
         /// 最大超时时间（天）
@@ -27,7 +32,7 @@ namespace TuShan.BountyHunterDream.Setting.Setting
         public int MaxTimeOutDay { get; set; } 
 
         /// <summary>
-        /// 需要执行清楚的时间点
+        /// 需要执行清除的时间点
         /// </summary>
         public DateTime NeedCleanTime { get; set; }
     }

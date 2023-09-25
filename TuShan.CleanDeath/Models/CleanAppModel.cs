@@ -6,8 +6,21 @@ using System.Threading.Tasks;
 
 namespace TuShan.CleanDeath.Models
 {
-    public class AppRegistryModel : Caliburn.Micro.Screen
+     public class CleanAppModel : Caliburn.Micro.Screen
     {
+        public CleanAppModel(string path)
+        {
+            AppExePath = path;
+            IsEnable = true;
+            GuidText = Guid.NewGuid().ToString();
+        }
+
+        public CleanAppModel()
+        {
+            IsEnable = true;
+            GuidText = Guid.NewGuid().ToString();
+        }
+
         private string appDisplayName;
 
         /// <summary>
@@ -20,21 +33,6 @@ namespace TuShan.CleanDeath.Models
             {
                 appDisplayName = value;
                 NotifyOfPropertyChange(() => AppDisplayName);
-            }
-        }
-
-        private string installLocation;
-
-        /// <summary>
-        /// 安装目录 例如：C:\Program Files\Google\Chrome\Application
-        /// </summary>
-        public string InstallLocation
-        {
-            get { return installLocation; }
-            set
-            {
-                installLocation = value;
-                NotifyOfPropertyChange(() => InstallLocation);
             }
         }
 
@@ -68,22 +66,22 @@ namespace TuShan.CleanDeath.Models
             }
         }
 
-
-        private string unInstallString;
+        private bool _isEnable;
 
         /// <summary>
-        /// 卸载命令
+        /// 是否启用
         /// </summary>
-        public string UnInstallString
+        public bool IsEnable
         {
-            get { return unInstallString; }
+            get { return _isEnable; }
             set
             {
-                unInstallString = value;
-                NotifyOfPropertyChange(() => UnInstallString);
+                _isEnable = value;
+                NotifyOfPropertyChange(() => IsEnable);
             }
         }
 
+        public string GuidText { get; set; }
 
     }
 }

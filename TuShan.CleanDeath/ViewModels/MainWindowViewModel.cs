@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using Caliburn.Micro;
 using HandyControl.Controls;
 using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
@@ -25,10 +26,60 @@ namespace TuShan.CleanDeath.ViewModels
 {
     public class MainWindowViewModel : Caliburn.Micro.Screen
     {
+        private readonly IWindowManager _iWindowManager;
 
         public MainWindowViewModel()
         {
+            _iWindowManager = IoC.Get<IWindowManager>();
         }
+
+        #region 主程序逻辑
+
+        public void ViewModelLoaded()
+        {
+            CleanFoldersLoaded();
+            GetAllAppNames();
+        }
+
+        public void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source.GetType() != typeof(TabControl))
+            {
+                return;
+            }
+            if (e.AddedItems != null && e.AddedItems.Count > 0 && e.AddedItems[0].GetType().Name == "TabItem")
+            {
+                //System.Windows.Controls.TabItem tabAddItem = e.AddedItems[0] as System.Windows.Controls.TabItem;
+                //if (tabAddItem.Header.ToString() == "软件设置")
+                //{
+                //    InfoMessageShow("仅支持64位系统");
+                //}
+            }
+        }
+
+        /// <summary>
+        /// 开始守护底裤
+        /// </summary>
+        public void StartGuard()
+        {
+            //更新检测时间
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
+            cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
+            SettingUtility.SaveTSetting(cleanDeathSetting);
+
+            Task.Run(() =>
+            {
+                ServiceUtility.StartService();
+                //初始化服务客户端
+                ServiceClientUtility.InitClient();
+                Thread.Sleep(1000);
+                this.TryCloseAsync();
+            });
+
+        }
+
+        #endregion  
 
         #region 文件夹设置相关
 
@@ -158,7 +209,7 @@ namespace TuShan.CleanDeath.ViewModels
         }
 
         /// <summary>
-        /// 添加监护文件夹
+        /// 添加空吧监控文件夹地址
         /// </summary>
         public void AddCleanFolderEvent()
         {
@@ -199,6 +250,11 @@ namespace TuShan.CleanDeath.ViewModels
             SettingUtility.SaveTSetting(cleanDeathSetting);
         }
 
+        public void SaveAppsInfoEvent()
+        {
+
+        }
+
         #endregion
 
         #region 应用选择
@@ -208,30 +264,61 @@ namespace TuShan.CleanDeath.ViewModels
         /// <summary>
         /// 注册表中所有应用名称
         /// </summary>
-        public ObservableCollection<AppRegistryModel> AllAppNames
+        public ObservableCollection<AppRegistryModel> AllAppInfos
         {
             get { return _allAppNames; }
             set
             {
                 _allAppNames = value;
-                NotifyOfPropertyChange(() => AllAppNames);
+                NotifyOfPropertyChange(() => AllAppInfos);
             }
         }
 
-        private string _selectedAppName;
+        private AppRegistryModel _selectedAppInfo;
 
         /// <summary>
         /// 选中的软件名称
         /// </summary>
-        public string SelectedAppName
+        public AppRegistryModel SelectedAppInfo
         {
-            get { return _selectedAppName; }
+            get { return _selectedAppInfo; }
             set
             {
-                _selectedAppName = value;
-                NotifyOfPropertyChange(() => SelectedAppName);
+                _selectedAppInfo = value;
+                NotifyOfPropertyChange(() => SelectedAppInfo);
             }
         }
+
+        private ObservableCollection<CleanAppModel> _cleanAppInfos = new ObservableCollection<CleanAppModel>();
+
+        /// <summary>
+        /// 用户选择的app列表
+        /// </summary>
+        public ObservableCollection<CleanAppModel> CleanAppInfos
+        {
+            get { return _cleanAppInfos; }
+            set
+            {
+                _cleanAppInfos = value;
+                NotifyOfPropertyChange(() => CleanAppInfos);
+            }
+        }
+
+        private CleanAppModel _selectCleanAppInfo;
+
+        /// <summary>
+        /// 选中的待清理的app信息
+        /// </summary>
+        public CleanAppModel SelectCleanAppInfo
+        {
+            get { return _selectCleanAppInfo; }
+            set
+            {
+                _selectCleanAppInfo = value;
+                NotifyOfPropertyChange(() => SelectCleanAppInfo);
+            }
+        }
+
 
         /// <summary>
         /// 获取本机电脑上所有应用名称
@@ -247,8 +334,30 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         private void GetSomeAppNotInRegistry()
         {
-            //火狐浏览器
-
+            SystemSetting systemSetting = SettingUtility.GetTSetting<SystemSetting>();
+            if (systemSetting == null)
+            {
+                return;
+            }
+            if (AllAppInfos == null)
+            {
+                AllAppInfos = new ObservableCollection<AppRegistryModel>();
+            }
+            foreach (AppSetttingStruct appSetttingStruct in systemSetting.WindowApps)
+            {
+                if (AllAppInfos.Any(a => a.AppDisplayName == appSetttingStruct.AppDisplayName))
+                {
+                    continue;
+                }
+                if (Directory.Exists(appSetttingStruct.AppFilePath))
+                {
+                    AppRegistryModel appRegistryModel = new AppRegistryModel();
+                    appRegistryModel.AppExePath = appSetttingStruct.AppFilePath;
+                    appRegistryModel.AppExeName = appSetttingStruct.AppExeName;
+                    appRegistryModel.AppDisplayName = appSetttingStruct.AppDisplayName;
+                    AllAppInfos.Add(appRegistryModel);
+                }
+            }
         }
 
         /// <summary>
@@ -267,7 +376,7 @@ namespace TuShan.CleanDeath.ViewModels
             GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry64, keyPath64Bit);
 
             installedApps = installedApps.OrderBy(i => i.AppDisplayName).ToList();
-            AllAppNames = new ObservableCollection<AppRegistryModel>(installedApps);
+            AllAppInfos = new ObservableCollection<AppRegistryModel>(installedApps);
         }
 
         private void GetInstalledAppsFromRegistry(List<AppRegistryModel> installedApps, RegistryView registryView, string keyPath)
@@ -310,9 +419,6 @@ namespace TuShan.CleanDeath.ViewModels
                                     appRegistryModel.InstallLocation = Path.GetDirectoryName(appRegistryModel.AppExePath);
                                 }
                                 installedApps.Add(appRegistryModel);
-                            }
-                            if (displayName.ToLower().Contains("chrome"))
-                            {
                             }
                         }
                     }
@@ -361,31 +467,6 @@ namespace TuShan.CleanDeath.ViewModels
                 }
             }
 
-        }
-
-        private void ExecuteUninstallCommand(string command)
-        {
-            if (!string.IsNullOrEmpty(command))
-            {
-                ProcessStartInfo psi = new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    RedirectStandardInput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                Process process = new Process
-                {
-                    StartInfo = psi
-                };
-
-                process.Start();
-
-                // 执行卸载命令
-                process.StandardInput.WriteLine(command);
-                process.WaitForExit();
-            }
         }
 
         public void DeleteAppCache(string appName)
@@ -460,52 +541,106 @@ namespace TuShan.CleanDeath.ViewModels
             TLog.Debug($"覆盖文件完成 {filePath}");
         }
 
-        #endregion
-
-        public void ViewModelLoaded()
+        /// <summary>
+        /// 添加软件信息
+        /// </summary>
+        public void AddAppInfoEvent()
         {
-            CleanFoldersLoaded();
-            GetAllAppNames();
-        }
-
-        public void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.Source.GetType() != typeof(TabControl))
+            if (CleanAppInfos == null)
             {
+                CleanAppInfos = new ObservableCollection<CleanAppModel>();
+            }
+            if (CleanAppInfos.Any(c => c.AppDisplayName == SelectedAppInfo.AppDisplayName))
+            {
+                InfoMessageShow("已有相同应用在列表中");
                 return;
             }
-            if (e.AddedItems != null && e.AddedItems.Count > 0 && e.AddedItems[0].GetType().Name == "TabItem")
-            {
-                System.Windows.Controls.TabItem tabAddItem = e.AddedItems[0] as System.Windows.Controls.TabItem;
-                if (tabAddItem.Header.ToString() == "软件设置")
-                {
-                    InfoMessageShow("仅支持64位系统");
-                }
-            }
+            CleanAppModel cleanAppModel = new CleanAppModel();
+            cleanAppModel.AppDisplayName = SelectedAppInfo.AppDisplayName;
+            cleanAppModel.AppExeName = SelectedAppInfo.AppExeName;
+            cleanAppModel.AppExePath = SelectedAppInfo.AppExePath;
+            CleanAppInfos.Add(cleanAppModel);
         }
 
         /// <summary>
-        /// 开始守护底裤
+        /// 手动添加要监控的软件
         /// </summary>
-        public void StartGuard()
+        /// <param name="cleanAppModel"></param>
+        public void AddAppInfoEventByHand(CleanAppModel cleanAppModel)
         {
-            //更新检测时间
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
-            cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
-            SettingUtility.SaveTSetting(cleanDeathSetting);
-
-            Task.Run(() =>
+            if (CleanAppInfos == null)
             {
-                ServiceUtility.StartService();
-                //初始化服务客户端
-                ServiceClientUtility.InitClient();
-                Thread.Sleep(1000);
-                this.TryCloseAsync();
-            });
+                CleanAppInfos = new ObservableCollection<CleanAppModel>();
+            }
+            if (CleanAppInfos.Any(c => c.AppDisplayName == cleanAppModel.AppDisplayName))
+            {
+                InfoMessageShow("已有相同应用在列表中");
+                return;
+            }
+
+            CleanAppInfos.Add(cleanAppModel);
+        }
+
+        /// <summary>
+        /// 手动添加软件信息
+        /// </summary>
+        public void HandAddAppInfoEvent()
+        {
+            AppInfoViewModel appInfoViewModel = new AppInfoViewModel();
+            appInfoViewModel.AddAppInfo -= AddAppInfoEventByHand;
+            appInfoViewModel.AddAppInfo += AddAppInfoEventByHand;
+            _iWindowManager.ShowDialogAsync(appInfoViewModel);
+        }
+
+        /// <summary>
+        /// 删除选中的守护软件项
+        /// </summary>
+        public void DeleteSelectedApp()
+        {
+            if (CleanAppInfos == null)
+            {
+                return;
+            }
+            CleanAppInfos.Remove(SelectCleanAppInfo);
+            if (CleanAppInfos.Count > 0)
+            {
+                SelectCleanAppInfo = CleanAppInfos[0];
+            }
 
         }
 
+        /// <summary>
+        /// 保存守护app信息到配置
+        /// </summary>
+        public void SaveCleanAppsEvent()
+        {
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            if (cleanDeathSetting == null)
+            {
+                cleanDeathSetting = new CleanDeathSetting();
+            }
+            List<CleanAppModel> newList = new List<CleanAppModel>();
+            cleanDeathSetting.CleanApps = new List<AppSetttingStruct>();
+            foreach (CleanAppModel cleanAppModel in CleanAppInfos)
+            {
+                if (string.IsNullOrWhiteSpace(cleanAppModel.AppExePath)
+                    || newList.Any(n => n.AppDisplayName.Equals(cleanAppModel.AppDisplayName)))
+                {
+                    continue;
+                }
+                newList.Add(cleanAppModel);
+                AppSetttingStruct structCleanApp = new AppSetttingStruct();
+                structCleanApp.AppDisplayName = cleanAppModel.AppDisplayName;
+                structCleanApp.AppExeName = cleanAppModel.AppExeName;
+                structCleanApp.AppFilePath = cleanAppModel.AppExePath;
+                structCleanApp.IsEnable = cleanAppModel.IsEnable;
+                cleanDeathSetting.CleanApps.Add(structCleanApp);
+            }
+            CleanAppInfos = new ObservableCollection<CleanAppModel>(newList);
+            SettingUtility.SaveTSetting(cleanDeathSetting);
+        }
+
+        #endregion
 
         #region message
 

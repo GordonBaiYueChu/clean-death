@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="名誉权守护系统"
         xmlns:cal="http://www.caliburnproject.org"
+        WindowStartupLocation="CenterScreen"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         Height="450"
         Width="800"
@@ -140,7 +141,8 @@
                     </TabItem>
                     <TabItem Header="软件设置">
                         <Grid Margin="10"
-                              Width="600">
+                              Width="600"
+                              x:Name="AppGrid">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"></RowDefinition>
                                 <RowDefinition Height="auto"></RowDefinition>
@@ -151,22 +153,22 @@
                                           VerticalAlignment="Center"
                                           HorizontalContentAlignment="Center"
                                           IsEditable="True"
-                                          hc:InfoElement.Placeholder="请输入软件名称"
+                                          hc:InfoElement.Placeholder="请输入或选则软件名称"
                                           hc:InfoElement.Title="应用名称"
                                           Style="{StaticResource ComboBoxExtend}"
                                           hc:InfoElement.Necessary="True"
                                           hc:InfoElement.TitlePlacement="Left"
-                                          ItemsSource="{Binding AllAppNames}"
+                                          ItemsSource="{Binding AllAppInfos}"
                                           DisplayMemberPath="AppDisplayName"
-                                          Text="{Binding SelectedAppName}" />
-                                <Button cal:Message.Attach="[Click]=[AddCleanFolderEvent()]"
+                                          SelectedItem="{Binding SelectedAppInfo}" />
+                                <Button cal:Message.Attach="[Click]=[AddAppInfoEvent()]"
                                         Content="添加"
                                         hc:FloatingBlock.Content="添加"
                                         Margin="15,5"
                                         Width="Auto" />
-                                <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
+                                <Button cal:Message.Attach="[Click]=[HandAddAppInfoEvent()]"
+                                        x:Name="HandButton"
                                         Content="手动添加"
-                                        hc:FloatingBlock.Content="保存"
                                         ToolTip="找不到时可以使用手动添加"
                                         Margin="25,5"
                                         Width="Auto" />
@@ -174,33 +176,30 @@
                             <StackPanel Grid.Row="1"
                                         Orientation="Horizontal"
                                         HorizontalAlignment="Center">
-                                <DataGrid x:Name="CleanFolderss"
+                                <DataGrid x:Name="CleanAppInfos"
                                           Width="600"
                                           Grid.Row="1"
-                                          SelectedItem="{Binding SelectedCleanFolderItem}"
+                                          SelectedItem="{Binding SelectedCleanAppItem}"
                                           IsReadOnly="False"
                                           AutoGenerateColumns="False"
                                           CanUserAddRows="False">
                                     <DataGrid.Columns>
-                                        <DataGridTemplateColumn Header="守护文件夹地址"
-                                                                Width="5*">
+                                        <DataGridTemplateColumn Header="软件名称"
+                                                                Width="2.5*">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock HorizontalAlignment="Left"
-                                                               Text="{Binding CleanFolderPath}"></TextBlock>
+                                                               Text="{Binding AppDisplayName}"></TextBlock>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-                                        <DataGridTemplateColumn Width="1*"
-                                                                Header="选择地址">
+                                        <DataGridTemplateColumn Width="3*"
+                                                                Header="可执行文件所在文件夹">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Grid HorizontalAlignment="Left">
-                                                        <ToggleButton ToolTip="请选择需要监控的文件夹"
-                                                                      cal:Message.Attach="[Click]=[SelectedFolder()]"
-                                                                      hc:IconElement.Geometry="{StaticResource DragHorizontalGeometry}"
-                                                                      Foreground="{DynamicResource PrimaryBrush}" />
-                                                    </Grid>
+                                                    <TextBlock HorizontalAlignment="Left"
+                                                               Text="{Binding AppExePath}"
+                                                               ToolTip="{Binding AppExePath}"></TextBlock>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -222,7 +221,7 @@
                                                         <Button Style="{DynamicResource CloseImageButton}"
                                                                 Width="Auto"
                                                                 Height="Auto"
-                                                                cal:Message.Attach="[Click]=[DeleteSelectedFolder()]"
+                                                                cal:Message.Attach="[Click]=[DeleteSelectedApp()]"
                                                                 HorizontalAlignment="Center"
                                                                 VerticalAlignment="Center" />
                                                     </Grid>
@@ -235,8 +234,7 @@
                             <StackPanel Grid.Row="2"
                                         Orientation="Horizontal"
                                         HorizontalAlignment="Center">
-
-                                <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
+                                <Button cal:Message.Attach="[Click]=[SaveCleanAppsEvent()]"
                                         Content="保存"
                                         hc:FloatingBlock.Content="保存"
                                         Margin="25,5"

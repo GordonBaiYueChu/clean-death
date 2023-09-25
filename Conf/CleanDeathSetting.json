@@ -7,7 +7,15 @@
       "IsEnable": true
     }
   ],
-  "WindowApps": [],
+  "CleanApps": [
+    {
+      "$id": "3",
+      "AppExeName": "Firefox",
+      "AppDisplayName": "Mozilla Firefox",
+      "AppFilePath": "C:\\Program Files\\Mozilla Firefox",
+      "IsEnable": true
+    }
+  ],
   "MaxTimeOutDay": 1,
   "NeedCleanTime": "2023-09-16 15:37:44"
 }

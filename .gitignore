@@ -1,0 +1,15 @@
+﻿################################################################################
+# 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
+################################################################################
+
+/.vs/TuShan.CleanDeath
+/TuShan.BountyHunterDream.Logger
+/TuShan.BountyHunterDream.Setting/obj/Debug
+/TuShan.BountyHunterDream.Setting/obj/Release
+/TuShan.CleanDeath/bin/Debug
+/TuShan.CleanDeath/packages
+/TuShan.CleanDeath.Service/bin/Debug
+/TuShan.CleanDeath.Service/obj/Debug
+/Debug
+/packages
+/Log
