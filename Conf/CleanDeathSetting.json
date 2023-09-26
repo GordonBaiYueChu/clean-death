@@ -14,6 +14,13 @@
       "AppDisplayName": "Mozilla Firefox",
       "AppFilePath": "C:\\Program Files\\Mozilla Firefox",
       "IsEnable": true
+    },
+    {
+      "$id": "4",
+      "AppExeName": "SogouExplorer",
+      "AppDisplayName": "SogouExplorer",
+      "AppFilePath": "C:\\Program Files (x86)\\Sogou\\SogouExplorer",
+      "IsEnable": true
     }
   ],
   "MaxTimeOutDay": 1,

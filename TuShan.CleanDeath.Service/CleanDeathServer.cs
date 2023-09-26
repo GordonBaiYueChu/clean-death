@@ -197,7 +197,7 @@ namespace TuShan.CleanDeath.Service
                     TLog.Debug("开始守护");
                     if (DateTime.Now > cleanDeathSetting.NeedCleanTime)
                     {
-                        TLog.Debug("删除你的宝贝，不可恢复");
+                        TLog.Debug("删除你的宝贝们，不可恢复");
                         StartClean();
                         _isRun = false;
                         Thread.Sleep(1000);

@@ -33,54 +33,6 @@ namespace TuShan.CleanDeath.ViewModels
             _iWindowManager = IoC.Get<IWindowManager>();
         }
 
-        #region 主程序逻辑
-
-        public void ViewModelLoaded()
-        {
-            CleanFoldersLoaded();
-            GetAllAppNames();
-        }
-
-        public void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.Source.GetType() != typeof(TabControl))
-            {
-                return;
-            }
-            if (e.AddedItems != null && e.AddedItems.Count > 0 && e.AddedItems[0].GetType().Name == "TabItem")
-            {
-                //System.Windows.Controls.TabItem tabAddItem = e.AddedItems[0] as System.Windows.Controls.TabItem;
-                //if (tabAddItem.Header.ToString() == "软件设置")
-                //{
-                //    InfoMessageShow("仅支持64位系统");
-                //}
-            }
-        }
-
-        /// <summary>
-        /// 开始守护底裤
-        /// </summary>
-        public void StartGuard()
-        {
-            //更新检测时间
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
-            cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
-            SettingUtility.SaveTSetting(cleanDeathSetting);
-
-            Task.Run(() =>
-            {
-                ServiceUtility.StartService();
-                //初始化服务客户端
-                ServiceClientUtility.InitClient();
-                Thread.Sleep(1000);
-                this.TryCloseAsync();
-            });
-
-        }
-
-        #endregion  
-
         #region 文件夹设置相关
 
         private ObservableCollection<CleanFolderModel> _cleanFolders = new ObservableCollection<CleanFolderModel>();
@@ -248,11 +200,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
             CleanFolders = new ObservableCollection<CleanFolderModel>(newList);
             SettingUtility.SaveTSetting(cleanDeathSetting);
-        }
-
-        public void SaveAppsInfoEvent()
-        {
-
         }
 
         #endregion
@@ -469,23 +416,48 @@ namespace TuShan.CleanDeath.ViewModels
 
         }
 
+        /// <summary>
+        /// 删除app缓存
+        /// </summary>
+        /// <param name="appName"></param>
+        /// C:\Users\Administrator\AppData
+        /// 默认应该有三个文件夹可以缓存文件 \Local \Roaming \LocalLow
         public void DeleteAppCache(string appName)
         {
-            string basePath = "C:\\Users";
-            if (System.IO.Directory.Exists(basePath))
+            string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string roamingFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string localLowFolderPath = Path.Combine(localFolderPath, "..\\LocalLow");
+            List<string> needDeleteFolder = new List<string>();
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            if (cleanDeathSetting == null)
             {
-                DirectoryInfo dirRoot = new DirectoryInfo(basePath);
-                DirectoryInfo[] dirs = dirRoot.GetDirectories();
-                foreach (DirectoryInfo item in dirs)
+                return;
+            }
+            foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+            {
+                //1.exe文件路径
+                if (structCleanFolder.AppFilePath.Contains(".exe"))
                 {
-                    if (item.FullName.Contains("Default") || item.FullName.Contains("Public"))
+                    structCleanFolder.AppFilePath = Directory.GetParent(structCleanFolder.AppFilePath).FullName; 
+                }
+                needDeleteFolder.Add(structCleanFolder.AppFilePath);
+                //2.三个缓存文件夹路径
+                // GetDeleteFloderByExeName(needDeleteFolder,structCleanFolder.AppDisplayName,localFolderPath,roamingFolderPath,localLowFolderPath);
+                DirectoryInfo dirRoot = new DirectoryInfo(localFolderPath);
+                DirectoryInfo[] dirs = dirRoot.GetDirectories();
+                foreach (var item in dirs)
+                {
+                    if (structCleanFolder.AppDisplayName.EndsWith(item.Name))
                     {
-                        continue;
+                        needDeleteFolder.Add(item.FullName);
                     }
-                    string appCachePath = Path.Combine(item.FullName, "AppDara", "Roaming");
-
                 }
             }
+        }
+
+        public void GetDeleteFloderByExeName()
+        { 
+        
         }
 
         /// <summary>
@@ -640,7 +612,90 @@ namespace TuShan.CleanDeath.ViewModels
             SettingUtility.SaveTSetting(cleanDeathSetting);
         }
 
+        public void CleanAppsLoaded()
+        {
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            if (cleanDeathSetting == null)
+            {
+                cleanDeathSetting = new CleanDeathSetting();
+            }
+
+            List<CleanAppModel> cleanFolderModels = new List<CleanAppModel>();
+            foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+            {
+                CleanAppModel cleanAppModel = new CleanAppModel();
+                cleanAppModel.AppExePath = structCleanFolder.AppFilePath;
+                cleanAppModel.AppExeName = structCleanFolder.AppExeName;
+                cleanAppModel.IsEnable = structCleanFolder.IsEnable;
+                cleanAppModel.AppDisplayName= structCleanFolder.AppDisplayName;
+                cleanFolderModels.Add(cleanAppModel);
+            }
+
+            CleanAppInfos = new ObservableCollection<CleanAppModel>(cleanFolderModels);
+            if (CleanAppInfos != null && CleanAppInfos.Count > 0)
+            {
+                SelectCleanAppInfo = CleanAppInfos[0];
+            }
+        }
+
         #endregion
+
+        #region 主程序逻辑
+
+        public void ViewModelLoaded()
+        {
+            CleanFoldersLoaded();
+            GetAllAppNames();
+            CleanAppsLoaded();
+        }
+
+        public void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source.GetType() != typeof(TabControl))
+            {
+                return;
+            }
+            if (e.AddedItems != null && e.AddedItems.Count > 0 && e.AddedItems[0].GetType().Name == "TabItem")
+            {
+                //System.Windows.Controls.TabItem tabAddItem = e.AddedItems[0] as System.Windows.Controls.TabItem;
+                //if (tabAddItem.Header.ToString() == "软件设置")
+                //{
+                //    InfoMessageShow("仅支持64位系统");
+                //}
+            }
+        }
+
+        /// <summary>
+        /// 开始守护底裤
+        /// </summary>
+        public void StartGuard()
+        {
+            //开始app删除逻辑
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            foreach (AppSetttingStruct appSetttingStruct in cleanDeathSetting.CleanApps)
+            { 
+            
+            }
+
+            return;
+            //更新检测时间
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
+            cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
+            SettingUtility.SaveTSetting(cleanDeathSetting);
+
+            Task.Run(() =>
+            {
+                ServiceUtility.StartService();
+                //初始化服务客户端
+                ServiceClientUtility.InitClient();
+                Thread.Sleep(1000);
+                this.TryCloseAsync();
+            });
+
+        }
+
+        #endregion  
 
         #region message
 

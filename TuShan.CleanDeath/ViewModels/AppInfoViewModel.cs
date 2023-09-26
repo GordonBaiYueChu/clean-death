@@ -162,6 +162,7 @@ namespace TuShan.CleanDeath.ViewModels
         public void SaveCleanAppEvent()
         {
             AddAppInfo?.Invoke(_cleanAppModel);
+            this.TryCloseAsync();
         }
     }
 }
