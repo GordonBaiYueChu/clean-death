@@ -19,6 +19,7 @@ using System.Threading;
 using TuShan.BountyHunterDream.Setting.Struct;
 using System.IO;
 using System.Security.Cryptography;
+using System.Reflection;
 
 namespace TuShan.CleanDeath.Service
 {
@@ -195,12 +196,12 @@ namespace TuShan.CleanDeath.Service
                         continue;
                     }
                     TLog.Debug("开始守护");
-                    if (DateTime.Now > cleanDeathSetting.NeedCleanTime)
+                    //if (DateTime.Now > cleanDeathSetting.NeedCleanTime)
                     {
                         TLog.Debug("删除你的宝贝们，不可恢复");
                         StartClean();
                         _isRun = false;
-                        Thread.Sleep(1000);
+                        return;
                     }
                 }
             });
@@ -210,6 +211,12 @@ namespace TuShan.CleanDeath.Service
         /// 开始清空所有
         /// </summary>
         private void StartClean()
+        {
+            CleanFolder();
+            CleanApp();
+        }
+
+        private  void CleanFolder()
         {
             TLog.Debug("开始删除文件");
             CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
@@ -229,11 +236,243 @@ namespace TuShan.CleanDeath.Service
             }
         }
 
+        private void CleanApp()
+        {
+            try
+            {
+                //开始获取app的进程和缓存文件地址
+                GetAppCacheFolderPath();
+                //开始关闭进程
+                CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+                foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+                {
+                    CloseProcessByName(structCleanFolder.AppExeName);
+                }
+                Thread.Sleep(100);
+                //删除桌面快捷方式
+                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                TraverseDirectory(desktopPath, cleanDeathSetting.CleanApps);
+                string allDesktopPath = "C:\\Users\\Public\\Desktop";
+                TraverseDirectory(allDesktopPath, cleanDeathSetting.CleanApps);
+                Thread.Sleep(100);
+                //删除任务栏快捷方式
+                DeleteLnkOnTask(cleanDeathSetting.CleanApps);
+                Thread.Sleep(100);
+                foreach (string path in _NeedDeleteAppFolder)
+                {
+                    TLog.Info("待删除目录" + path);
+                }
+                foreach (string path in _NeedDeleteAppFolder)
+                {
+                    TLog.Info("删除目录" + path);
+                    DeleteFolder(path);
+                }
+            }
+            catch(Exception ex)
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// 删除任务栏上的快捷方式
+        /// </summary>
+        /// <param name="CleanApps"></param>
+        private void DeleteLnkOnTask(List<AppSetttingStruct> CleanApps)
+        {
+            string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string parentDirectory = Directory.GetParent(localFolderPath).FullName;
+            string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
+            string path =  Path.Combine(roamingFolderPath, "Microsoft", "Internet Explorer", "Quick Launch", "User Pinned", "TaskBar");
+            string[] files = Directory.GetFiles(path);
+            foreach (string file in files)
+            {
+                if (file.Contains(".lnk"))
+                {
+                    string fileee = GetShortcutTarget(file);
+                    if (CleanApps.Any(c => fileee.Contains(c.AppExeName)))
+                    {
+                        File.Delete(file);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 遍历文件夹
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <param name="cleanDeathSetting1"></param>
+        void TraverseDirectory(string folderPath, List<AppSetttingStruct> cleanDeathSetting)
+        {
+            try
+            {
+                if (!Directory.Exists(folderPath))
+                {
+                    return;
+                }
+                string[] files = Directory.GetFiles(folderPath);
+                foreach (string file in files)
+                {
+                    if (file.Contains(".lnk"))
+                    {
+                        string fileee = GetShortcutTarget(file);
+                        if (cleanDeathSetting.Any(c => fileee.Contains(c.AppExeName)))
+                        {
+                            File.Delete(file);
+                        }
+                    }
+                }
+                string[] subdirectories = Directory.GetDirectories(folderPath);
+                foreach (string subdirectory in subdirectories)
+                {
+                    TraverseDirectory(subdirectory, cleanDeathSetting);
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        /// <summary>
+        /// 获取快捷方式的目标地址
+        /// </summary>
+        /// <param name="shortcutPath"></param>
+        /// <returns></returns>
+        string GetShortcutTarget(string shortcutPath)
+        {
+            try
+            {
+                Type shellType = Type.GetTypeFromProgID("WScript.Shell");
+                object shell = Activator.CreateInstance(shellType);
+                object shortcut = shellType.InvokeMember("CreateShortcut", BindingFlags.InvokeMethod, null, shell, new object[] { shortcutPath });
+                string targetPath = (string)shortcut.GetType().InvokeMember("TargetPath", BindingFlags.GetProperty, null, shortcut, null);
+                return targetPath;
+            }
+            catch (Exception ex)
+            {
+                // 处理异常，如快捷方式文件不存在或无法读取
+                Console.WriteLine("发生异常：" + ex.Message);
+                return null;
+            }
+        }
+
+
+        /// <summary>
+        /// 需要删除的程序文件多线程所以用静态
+        /// </summary>
+        public static List<string> _NeedDeleteAppFolder = new List<string>();
+
+        /// <summary>
+        /// 删除app缓存
+        /// </summary>
+        /// C:\Users\Administrator\AppData
+        /// 默认应该有三个文件夹可以缓存文件 \Local \Roaming \LocalLow
+        private void GetAppCacheFolderPath()
+        {
+            //12s 8s 多线程4s
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            //三个缓存文件夹路径
+            string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string parentDirectory = Directory.GetParent(localFolderPath).FullName;
+            string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
+            string localLowFolderPath = Path.Combine(parentDirectory, "LocalLow");
+            TLog.Info($"11111 {localFolderPath}");
+            TLog.Info($"22222 {roamingFolderPath}");
+            TLog.Info($"33333 {localLowFolderPath}");
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            if (cleanDeathSetting == null)
+            {
+                return;
+            }
+            List<string> exeNameLists = new List<string>();
+            foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+            {
+                //1.exe文件路径
+                if (structCleanFolder.AppFilePath.Contains(".exe"))
+                {
+                    structCleanFolder.AppFilePath = Directory.GetParent(structCleanFolder.AppFilePath).FullName;
+                }
+                if (!_NeedDeleteAppFolder.Contains(structCleanFolder.AppFilePath))
+                {
+                    _NeedDeleteAppFolder.Add(structCleanFolder.AppFilePath);
+                    exeNameLists.Add(structCleanFolder.AppExeName);
+                }
+            }
+
+            Task task1 = Task.Run(() =>
+            {
+                GetDeleteFloderByExeName(localFolderPath, exeNameLists, ref _NeedDeleteAppFolder);
+            });
+            Task task2 = Task.Run(() =>
+            {
+                GetDeleteFloderByExeName(roamingFolderPath, exeNameLists, ref _NeedDeleteAppFolder);
+            });
+            Task task3 = Task.Run(() =>
+            {
+                GetDeleteFloderByExeName(localLowFolderPath, exeNameLists, ref _NeedDeleteAppFolder);
+            });
+            Task[] tasks = new Task[] { task1, task2, task3 };
+            Task.WaitAll(tasks);
+            stopwatch.Stop();
+        }
+
+        private void GetDeleteFloderByExeName(string srcPath, List<string> exeNameLists, ref List<string> needDeleteFolder)
+        {
+            try
+            {
+                DirectoryInfo dirRoot = new DirectoryInfo(srcPath);
+                if (dirRoot == null)
+                {
+                    return;
+                }
+                DirectoryInfo[] dirs = dirRoot.GetDirectories();
+                if (dirs == null)
+                {
+                    return;
+                }
+                foreach (var item in dirs)
+                {
+                    if (exeNameLists.Contains(item.Name))
+                    {
+                        if (!needDeleteFolder.Contains(item.FullName))
+                        {
+                            needDeleteFolder.Add(item.FullName);
+                        }
+                    }
+                    GetDeleteFloderByExeName(item.FullName, exeNameLists, ref needDeleteFolder);
+                }
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
+        }
+
+        private void CloseProcessByName(string peocessName)
+        {
+            Process[] processes = Process.GetProcessesByName(peocessName);
+
+            if (processes.Length > 0)
+            {
+                foreach (Process process in processes)
+                {
+                    process.Kill();
+                    TLog.Info($"关闭{peocessName}进程");
+                }
+            }
+            else
+            {
+                TLog.Info($"{peocessName}未运行");
+            }
+        }
+
+
         /// <summary>
         /// 删除目录,且数据不可恢复
         /// </summary>
         /// <param name="dir">要删除的目录</param>
-        public void DeleteFolder(string dir, List<string> notDeleteFileList = null, List<string> notDeleteFolderList = null)
+        private void DeleteFolder(string dir, List<string> notDeleteFileList = null, List<string> notDeleteFolderList = null)
         {
             if (System.IO.Directory.Exists(dir))
             {
@@ -279,7 +518,7 @@ namespace TuShan.CleanDeath.Service
                 fs.Seek(0, SeekOrigin.Begin);
                 fs.Write(randomData, 0, randomData.Length);
             }
-            TLog.Debug($"覆盖文件完成 {filePath}");
+            //TLog.Debug($"覆盖文件完成 {filePath}");
         }
 
         /// <summary>
@@ -303,7 +542,8 @@ namespace TuShan.CleanDeath.Service
         private void SaveCleanDeathSetting(CleanDeathSetting cleanDeathSetting)
         {
             string parentDirectory = Directory.GetParent(processPath).FullName;
-            string path = Path.Combine(parentDirectory, "Config", typeof(CleanDeathSetting).Name + ".json");
+            parentDirectory = Directory.GetParent(parentDirectory).FullName;
+            string path = Path.Combine(parentDirectory, "Conf", typeof(CleanDeathSetting).Name + ".json");
             TLog.Debug("保存配置路径：" + path);
             SettingUtility.SaveTSetting(cleanDeathSetting, path);
         }

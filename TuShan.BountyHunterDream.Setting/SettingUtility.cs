@@ -101,10 +101,6 @@ namespace TuShan.BountyHunterDream.Setting
 
         private static void SaveToJson<T>(T t, string path, string lastpath) where T : BaseSetting<T>, new()
         {
-            if (File.Exists(path))
-            {
-                File.Copy(path, lastpath, true);
-            }
             t.Write(t, path);
         }
         #endregion

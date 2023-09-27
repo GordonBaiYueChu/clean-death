@@ -4,12 +4,15 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Xml.Linq;
 using Caliburn.Micro;
 using HandyControl.Controls;
 using Microsoft.Win32;
@@ -417,50 +420,6 @@ namespace TuShan.CleanDeath.ViewModels
         }
 
         /// <summary>
-        /// 删除app缓存
-        /// </summary>
-        /// <param name="appName"></param>
-        /// C:\Users\Administrator\AppData
-        /// 默认应该有三个文件夹可以缓存文件 \Local \Roaming \LocalLow
-        public void DeleteAppCache(string appName)
-        {
-            string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string roamingFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string localLowFolderPath = Path.Combine(localFolderPath, "..\\LocalLow");
-            List<string> needDeleteFolder = new List<string>();
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            if (cleanDeathSetting == null)
-            {
-                return;
-            }
-            foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
-            {
-                //1.exe文件路径
-                if (structCleanFolder.AppFilePath.Contains(".exe"))
-                {
-                    structCleanFolder.AppFilePath = Directory.GetParent(structCleanFolder.AppFilePath).FullName; 
-                }
-                needDeleteFolder.Add(structCleanFolder.AppFilePath);
-                //2.三个缓存文件夹路径
-                // GetDeleteFloderByExeName(needDeleteFolder,structCleanFolder.AppDisplayName,localFolderPath,roamingFolderPath,localLowFolderPath);
-                DirectoryInfo dirRoot = new DirectoryInfo(localFolderPath);
-                DirectoryInfo[] dirs = dirRoot.GetDirectories();
-                foreach (var item in dirs)
-                {
-                    if (structCleanFolder.AppDisplayName.EndsWith(item.Name))
-                    {
-                        needDeleteFolder.Add(item.FullName);
-                    }
-                }
-            }
-        }
-
-        public void GetDeleteFloderByExeName()
-        { 
-        
-        }
-
-        /// <summary>
         /// 删除目录,且数据不可恢复
         /// </summary>
         /// <param name="dir">要删除的目录</param>
@@ -612,6 +571,9 @@ namespace TuShan.CleanDeath.ViewModels
             SettingUtility.SaveTSetting(cleanDeathSetting);
         }
 
+        /// <summary>
+        /// 加载需要守护的app信息
+        /// </summary>
         public void CleanAppsLoaded()
         {
             CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
@@ -627,7 +589,7 @@ namespace TuShan.CleanDeath.ViewModels
                 cleanAppModel.AppExePath = structCleanFolder.AppFilePath;
                 cleanAppModel.AppExeName = structCleanFolder.AppExeName;
                 cleanAppModel.IsEnable = structCleanFolder.IsEnable;
-                cleanAppModel.AppDisplayName= structCleanFolder.AppDisplayName;
+                cleanAppModel.AppDisplayName = structCleanFolder.AppDisplayName;
                 cleanFolderModels.Add(cleanAppModel);
             }
 
@@ -641,6 +603,19 @@ namespace TuShan.CleanDeath.ViewModels
         #endregion
 
         #region 主程序逻辑
+
+        private Visibility _isBusyModel = Visibility.Collapsed;
+
+        public Visibility BusyBorderShow
+        {
+            get { return _isBusyModel; }
+            set
+            {
+                _isBusyModel = value;
+                NotifyOfPropertyChange(() => BusyBorderShow);
+            }
+        }
+
 
         public void ViewModelLoaded()
         {
@@ -668,30 +643,23 @@ namespace TuShan.CleanDeath.ViewModels
         /// <summary>
         /// 开始守护底裤
         /// </summary>
-        public void StartGuard()
+        public async void StartGuard()
         {
-            //开始app删除逻辑
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            foreach (AppSetttingStruct appSetttingStruct in cleanDeathSetting.CleanApps)
-            { 
-            
-            }
-
-            return;
-            //更新检测时间
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
-            cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
-            SettingUtility.SaveTSetting(cleanDeathSetting);
-
-            Task.Run(() =>
+            BusyBorderShow = Visibility.Visible;
+            await Task.Run(() =>
             {
+                //更新检测时间
+                CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+                cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
+                cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
+                SettingUtility.SaveTSetting(cleanDeathSetting);
                 ServiceUtility.StartService();
                 //初始化服务客户端
                 ServiceClientUtility.InitClient();
                 Thread.Sleep(1000);
                 this.TryCloseAsync();
             });
+            BusyBorderShow = Visibility.Collapsed;
 
         }
 
