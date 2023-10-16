@@ -342,6 +342,19 @@ namespace TuShan.CleanDeath.ViewModels
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
+
+                            //if (displayName != null && displayName.Contains("搜狗"))
+                            //{ 
+                            
+                            //}
+
+                            //foreach (string valueName in appKey.GetValueNames())
+                            //{
+                            //    string valueData = appKey.GetValue(valueName) as string;
+                            //    Console.WriteLine("启动项名称：" + valueName);
+                            //    Console.WriteLine("应用程序路径：" + valueData);
+                            //}
+
                             // 排除系统应用 systemComponent == 1
                             int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
                             if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
@@ -477,6 +490,11 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public void AddAppInfoEvent()
         {
+            if (SelectedAppInfo == null)
+            {
+                InfoMessageShow("请先选择应用");
+                return;
+            }
             if (CleanAppInfos == null)
             {
                 CleanAppInfos = new ObservableCollection<CleanAppModel>();
@@ -499,6 +517,10 @@ namespace TuShan.CleanDeath.ViewModels
         /// <param name="cleanAppModel"></param>
         public void AddAppInfoEventByHand(CleanAppModel cleanAppModel)
         {
+            if (cleanAppModel == null)
+            {
+                return;
+            }
             if (CleanAppInfos == null)
             {
                 CleanAppInfos = new ObservableCollection<CleanAppModel>();
@@ -645,9 +667,14 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public async void StartGuard()
         {
+            if(MessageBoxResult.No ==  System.Windows.MessageBox.Show("已保存所有设置？","询问",MessageBoxButton.YesNo))
+            {
+                return;
+            }
             BusyBorderShow = Visibility.Visible;
             await Task.Run(() =>
             {
+                RestratHelp.RunRestartTools(true);
                 //更新检测时间
                 CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
                 cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;

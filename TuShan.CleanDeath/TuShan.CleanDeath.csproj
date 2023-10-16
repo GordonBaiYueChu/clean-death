@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>tushan.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AsyncIO, Version=0.1.69.0, Culture=neutral, PublicKeyToken=44a94435bd6f33f8, processorArchitecture=MSIL">
       <HintPath>..\packages\AsyncIO.0.1.69\lib\net40\AsyncIO.dll</HintPath>
@@ -117,6 +120,7 @@
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="Helps\MessageHelp.cs" />
+    <Compile Include="Helps\RestratHelp.cs" />
     <Compile Include="Helps\ServiceClient.cs" />
     <Compile Include="Helps\Win32Help.cs" />
     <Compile Include="Models\AppRegistryModel.cs" />
@@ -229,6 +233,8 @@
   <ItemGroup>
     <Resource Include="Resource\Image\Dance.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="tushan.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

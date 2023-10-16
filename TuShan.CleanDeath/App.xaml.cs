@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Threading;
 using TuShan.BountyHunterDream.Logger;
 using TuShan.CleanDeath.Helps;
+using TuShan.CleanDeath.Service.Struct;
 
 namespace TuShan.CleanDeath
 {
@@ -16,6 +17,12 @@ namespace TuShan.CleanDeath
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (IsAutoStartModel(e.Args))
+            {
+                ServiceUtility.StartService();
+                Environment.Exit((int)ProcessStateCodeEnum.ExitCodeSuccess);
+                return;
+            }
             //配置日志文件信息
             TLog.Configure("../Conf/Factory/log4net.config");
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
@@ -26,10 +33,23 @@ namespace TuShan.CleanDeath
                 //阻止自动休眠
                 OperateWindows.PreventAutoSleep();
             });
-            //MessageBox.Show("111111111");
             //关闭可能存在的服务
             ServiceUtility.StopService();
             base.OnStartup(e);
+        }
+
+        /// <summary>
+        /// 开机自启的指定启动参数
+        /// </summary>
+        private const string AUTO_START = "AutoStart";
+
+        private bool IsAutoStartModel(string[] args)
+        {
+            if (args != null && args.Length == 1 && args[0].Equals(AUTO_START))
+            {
+                return true;
+            }
+            return false;
         }
 
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

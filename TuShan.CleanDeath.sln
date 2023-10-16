@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuShan.BountyHunterDream.Se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuShan.CleanDeath.Service", "TuShan.CleanDeath.Service\TuShan.CleanDeath.Service.csproj", "{0C0A9C15-B574-4A98-9812-E34B91C8362F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReocrdRestartTools", "ReocrdRestartTools\ReocrdRestartTools.csproj", "{0622F3EB-EEE1-484F-B3B3-806D66BC1076}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{0C0A9C15-B574-4A98-9812-E34B91C8362F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0C0A9C15-B574-4A98-9812-E34B91C8362F}.Release|x64.ActiveCfg = Release|Any CPU
 		{0C0A9C15-B574-4A98-9812-E34B91C8362F}.Release|x64.Build.0 = Release|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Debug|x64.Build.0 = Debug|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Release|x64.ActiveCfg = Release|Any CPU
+		{0622F3EB-EEE1-484F-B3B3-806D66BC1076}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

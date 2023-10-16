@@ -196,7 +196,7 @@ namespace TuShan.CleanDeath.Service
                         continue;
                     }
                     TLog.Debug("开始守护");
-                    //if (DateTime.Now > cleanDeathSetting.NeedCleanTime)
+                    if (DateTime.Now > cleanDeathSetting.NeedCleanTime)
                     {
                         TLog.Debug("删除你的宝贝们，不可恢复");
                         StartClean();
@@ -216,7 +216,7 @@ namespace TuShan.CleanDeath.Service
             CleanApp();
         }
 
-        private  void CleanFolder()
+        private void CleanFolder()
         {
             TLog.Debug("开始删除文件");
             CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
@@ -268,7 +268,7 @@ namespace TuShan.CleanDeath.Service
                     DeleteFolder(path);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
@@ -283,19 +283,27 @@ namespace TuShan.CleanDeath.Service
             string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string parentDirectory = Directory.GetParent(localFolderPath).FullName;
             string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
-            string path =  Path.Combine(roamingFolderPath, "Microsoft", "Internet Explorer", "Quick Launch", "User Pinned", "TaskBar");
+            string path = Path.Combine(roamingFolderPath, "Microsoft", "Internet Explorer", "Quick Launch", "User Pinned", "TaskBar");
             string[] files = Directory.GetFiles(path);
             foreach (string file in files)
             {
                 if (file.Contains(".lnk"))
                 {
                     string fileee = GetShortcutTarget(file);
-                    if (CleanApps.Any(c => fileee.Contains(c.AppExeName)))
+                    string lnkName = GetPathLinkName(file);
+                    if (CleanApps.Any(c => fileee.Contains(c.AppExeName) || c.AppFilePath.Contains(lnkName)))
                     {
                         File.Delete(file);
                     }
                 }
             }
+        }
+
+        private string GetPathLinkName(string path)
+        {
+            string[] strings = path.Split('\\');
+            string name = strings[strings.Length - 1].Replace(".lnk","");
+            return name;
         }
 
         /// <summary>
@@ -317,7 +325,7 @@ namespace TuShan.CleanDeath.Service
                     if (file.Contains(".lnk"))
                     {
                         string fileee = GetShortcutTarget(file);
-                        if (cleanDeathSetting.Any(c => fileee.Contains(c.AppExeName)))
+                        if (cleanDeathSetting.Any(c => fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName)))
                         {
                             File.Delete(file);
                         }

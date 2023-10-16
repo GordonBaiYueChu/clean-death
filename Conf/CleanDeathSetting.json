@@ -3,26 +3,11 @@
   "CleanFolders": [
     {
       "$id": "2",
-      "FolderPath": "D:\\cleandeath\\cleandeathold",
+      "FolderPath": "D:\\cleandeath\\cleandeathnew",
       "IsEnable": true
     }
   ],
-  "CleanApps": [
-    {
-      "$id": "3",
-      "AppExeName": "Firefox",
-      "AppDisplayName": "Mozilla Firefox",
-      "AppFilePath": "C:\\Program Files\\Mozilla Firefox",
-      "IsEnable": true
-    },
-    {
-      "$id": "4",
-      "AppExeName": "SogouExplorer",
-      "AppDisplayName": "SogouExplorer",
-      "AppFilePath": "C:\\Program Files (x86)\\Sogou\\SogouExplorer",
-      "IsEnable": true
-    }
-  ],
-  "MaxTimeOutDay": 1,
-  "NeedCleanTime": "2023-10-07 23:31:56"
+  "CleanApps": [],
+  "MaxTimeOutDay": 0,
+  "NeedCleanTime": "2023-10-16 15:15:06"
 }

@@ -87,7 +87,7 @@
                                                             Header="选择按钮">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Grid HorizontalAlignment="Left">
+                                                <Grid HorizontalAlignment="Center">
                                                     <ToggleButton ToolTip="请选择需要监控的文件夹"
                                                                   cal:Message.Attach="[Click]=[SelectedFolder()]"
                                                                   hc:IconElement.Geometry="{StaticResource DragHorizontalGeometry}"
@@ -101,22 +101,20 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox IsChecked="{Binding IsEnable}"
+                                                          Margin="7,0,0,0"
                                                           cal:Message.Attach="[Checked]=[UseOnActiveChecked($source,$eventArgs)];[Unchecked]=[UseOnActiveChecked($source,$eventArgs)]" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Width="1*"
+                                    <DataGridTemplateColumn Width="*"
                                                             Header="删除">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Grid HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center">
+                                                <Grid Margin="8,0,0,0">
                                                     <Button Style="{DynamicResource CloseImageButton}"
                                                             Width="Auto"
                                                             Height="Auto"
-                                                            cal:Message.Attach="[Click]=[DeleteSelectedFolder()]"
-                                                            HorizontalAlignment="Center"
-                                                            VerticalAlignment="Center" />
+                                                            cal:Message.Attach="[Click]=[DeleteSelectedFolder()]" />
                                                 </Grid>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -208,6 +206,7 @@
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <CheckBox IsChecked="{Binding IsEnable}"
+                                                              Margin="7,0,0,0"
                                                               cal:Message.Attach="[Checked]=[UseOnActiveChecked($source,$eventArgs)];[Unchecked]=[UseOnActiveChecked($source,$eventArgs)]" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
@@ -216,8 +215,7 @@
                                                                 Header="删除">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Grid HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center">
+                                                    <Grid Margin="-20,0,0,0">
                                                         <Button Style="{DynamicResource CloseImageButton}"
                                                                 Width="Auto"
                                                                 Height="Auto"
