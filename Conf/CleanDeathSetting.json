@@ -7,7 +7,22 @@
       "IsEnable": true
     }
   ],
-  "CleanApps": [],
+  "CleanApps": [
+    {
+      "$id": "3",
+      "AppExeName": "SogouExplorer",
+      "AppDisplayName": "搜狗高速浏览器",
+      "AppFilePath": "C:\\Program Files (x86)\\Sogou\\SogouExplorer\\app_sogou.ico",
+      "IsEnable": true
+    },
+    {
+      "$id": "4",
+      "AppExeName": "Firefox",
+      "AppDisplayName": "Mozilla Firefox",
+      "AppFilePath": "C:\\Program Files\\Mozilla Firefox",
+      "IsEnable": true
+    }
+  ],
   "MaxTimeOutDay": 0,
-  "NeedCleanTime": "2023-10-16 15:15:06"
+  "NeedCleanTime": "2023-10-17 18:06:25"
 }

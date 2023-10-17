@@ -200,6 +200,7 @@ namespace TuShan.CleanDeath.Service
                     {
                         TLog.Debug("删除你的宝贝们，不可恢复");
                         StartClean();
+                        TLog.Debug("已经删除了你的宝贝们，不可恢复");
                         _isRun = false;
                         return;
                     }
@@ -396,8 +397,8 @@ namespace TuShan.CleanDeath.Service
             List<string> exeNameLists = new List<string>();
             foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
             {
-                //1.exe文件路径
-                if (structCleanFolder.AppFilePath.Contains(".exe"))
+                //文件路径包含.
+                if (structCleanFolder.AppFilePath.Contains("."))
                 {
                     structCleanFolder.AppFilePath = Directory.GetParent(structCleanFolder.AppFilePath).FullName;
                 }
@@ -495,6 +496,7 @@ namespace TuShan.CleanDeath.Service
                     // 使用随机数据覆盖文件内容
                     OverwriteFileWithRandomData(item.FullName);
                     File.Delete(item.FullName);
+                    TLog.Info($"111 delete File {item.FullName}");
                 }
 
                 DirectoryInfo[] dirs = dirRoot.GetDirectories();
@@ -507,6 +509,7 @@ namespace TuShan.CleanDeath.Service
                     }
                     DeleteFolder(item.FullName);
                     Directory.Delete(item.FullName);
+                    TLog.Info($"111 delete Folder {item.FullName}");
                 }
             }
         }

@@ -343,10 +343,10 @@ namespace TuShan.CleanDeath.ViewModels
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
 
-                            //if (displayName != null && displayName.Contains("搜狗"))
-                            //{ 
-                            
-                            //}
+                            if (displayName != null && displayName.Contains("搜狗"))
+                            {
+
+                            }
 
                             //foreach (string valueName in appKey.GetValueNames())
                             //{
@@ -368,12 +368,17 @@ namespace TuShan.CleanDeath.ViewModels
                                 appRegistryModel.InstallLocation = appKey.GetValue("InstallLocation") as string;
                                 appRegistryModel.AppExePath = appKey.GetValue("DisplayIcon") as string;
                                 appRegistryModel.UnInstallString = appKey.GetValue("UninstallString") as string;
-                                if (!string.IsNullOrWhiteSpace(appRegistryModel.AppExePath))
+                                if (!string.IsNullOrWhiteSpace(appRegistryModel.AppExePath) && appRegistryModel.AppExePath.Contains("\\"))
                                 {
                                     string exePath = appRegistryModel.AppExePath;
-                                    if (exePath.Contains("\\"))
+                                    if (appRegistryModel.AppExePath.EndsWith(".exe"))
                                     {
                                         exePath = exePath.Split('\\').Last();
+                                    }
+                                    else
+                                    {
+                                        string[] exePaths = exePath.Split('\\');
+                                        exePath = exePaths[exePaths.Length - 2];
                                     }
                                     appRegistryModel.AppExeName = exePath;
                                 }
@@ -507,7 +512,7 @@ namespace TuShan.CleanDeath.ViewModels
             CleanAppModel cleanAppModel = new CleanAppModel();
             cleanAppModel.AppDisplayName = SelectedAppInfo.AppDisplayName;
             cleanAppModel.AppExeName = SelectedAppInfo.AppExeName;
-            cleanAppModel.AppExePath = SelectedAppInfo.AppExePath;
+            cleanAppModel.AppExePath = string.IsNullOrWhiteSpace(SelectedAppInfo.InstallLocation) ? SelectedAppInfo.AppExePath : SelectedAppInfo.InstallLocation;
             CleanAppInfos.Add(cleanAppModel);
         }
 
@@ -667,7 +672,7 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public async void StartGuard()
         {
-            if(MessageBoxResult.No ==  System.Windows.MessageBox.Show("已保存所有设置？","询问",MessageBoxButton.YesNo))
+            if (MessageBoxResult.No == System.Windows.MessageBox.Show("已保存所有设置？", "询问", MessageBoxButton.YesNo))
             {
                 return;
             }
@@ -687,6 +692,11 @@ namespace TuShan.CleanDeath.ViewModels
                 this.TryCloseAsync();
             });
             BusyBorderShow = Visibility.Collapsed;
+
+        }
+
+        public void ViewModelClosed()
+        {
 
         }
 
