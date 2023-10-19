@@ -1,11 +1,6 @@
 {
   "$id": "1",
   "WindowApps": [
-    {
-      "$id": "2",
-      "AppExeName": "Firefox",
-      "AppDisplayName": "Mozilla Firefox",
-      "AppFilePath":"C:\\Program Files\\Mozilla Firefox"
-    }
+
   ]
 }

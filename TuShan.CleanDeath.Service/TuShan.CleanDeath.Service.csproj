@@ -96,6 +96,7 @@
     <Compile Include="Struct\SocketStruct.cs" />
     <Compile Include="Utility\CommonUtility.cs" />
     <Compile Include="Utility\ProcessUtility.cs" />
+    <Compile Include="Utility\ServiceClient.cs" />
     <Compile Include="Utility\WinAPI_Interop.cs" />
   </ItemGroup>
   <ItemGroup>

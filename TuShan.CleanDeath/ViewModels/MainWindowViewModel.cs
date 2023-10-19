@@ -276,7 +276,7 @@ namespace TuShan.CleanDeath.ViewModels
         private void GetAllAppNames()
         {
             GetAllAppNamesByRegistry();
-            GetSomeAppNotInRegistry();
+            //GetSomeAppNotInRegistry();
         }
 
         /// <summary>
@@ -320,10 +320,13 @@ namespace TuShan.CleanDeath.ViewModels
             // 遍历32位应用程序的注册表路径
             string keyPath32Bit = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
             GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry32, keyPath32Bit);
-
             // 遍历64位应用程序的注册表路径
-            string keyPath64Bit = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
-            GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry64, keyPath64Bit);
+            GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry64, keyPath32Bit);
+
+            //可能一些特殊应用存在如下位置
+            //string keyPath64Bit = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
+            //GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry32, keyPath64Bit);
+            //GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry64, keyPath64Bit);
 
             installedApps = installedApps.OrderBy(i => i.AppDisplayName).ToList();
             AllAppInfos = new ObservableCollection<AppRegistryModel>(installedApps);
@@ -331,7 +334,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private void GetInstalledAppsFromRegistry(List<AppRegistryModel> installedApps, RegistryView registryView, string keyPath)
         {
-
             using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
             using (RegistryKey subKey = key.OpenSubKey(keyPath))
             {
@@ -343,10 +345,14 @@ namespace TuShan.CleanDeath.ViewModels
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
 
-                            if (displayName != null && displayName.Contains("搜狗"))
-                            {
+                            //if (displayName != null && displayName.Contains("搜狗"))
+                            //{
 
-                            }
+                            //}
+                            //if (subKeyName != null && subKeyName.Contains("Moz"))
+                            //{ 
+
+                            //}
 
                             //foreach (string valueName in appKey.GetValueNames())
                             //{
@@ -508,6 +514,10 @@ namespace TuShan.CleanDeath.ViewModels
             {
                 InfoMessageShow("已有相同应用在列表中");
                 return;
+            }
+            if (SelectedAppInfo.AppDisplayName == "Mozilla Firefox")
+            {
+                InfoMessageShow("火狐浏览器可以使用其他浏览器的历史记录和收藏夹，请注意！");
             }
             CleanAppModel cleanAppModel = new CleanAppModel();
             cleanAppModel.AppDisplayName = SelectedAppInfo.AppDisplayName;
@@ -697,7 +707,7 @@ namespace TuShan.CleanDeath.ViewModels
 
         public void ViewModelClosed()
         {
-
+            //System.Windows.MessageBox.Show("未开启守护", "通知", MessageBoxButton.OK);
         }
 
         #endregion  

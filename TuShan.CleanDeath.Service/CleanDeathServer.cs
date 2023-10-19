@@ -4,13 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Timers;
 using TuShan.BountyHunterDream.Logger;
 using TuShan.BountyHunterDream.Setting.Common;
 using TuShan.CleanDeath.Service.Struct;
-using TuShan.CleanDeath.Service.Utility;
 using Microsoft.Win32;
 using System.ServiceProcess;
 using TuShan.BountyHunterDream.Setting.Setting;
@@ -20,6 +17,7 @@ using TuShan.BountyHunterDream.Setting.Struct;
 using System.IO;
 using System.Security.Cryptography;
 using System.Reflection;
+using TuShan.CleanDeath.Service.Utility;
 
 namespace TuShan.CleanDeath.Service
 {
@@ -202,6 +200,7 @@ namespace TuShan.CleanDeath.Service
                         StartClean();
                         TLog.Debug("已经删除了你的宝贝们，不可恢复");
                         _isRun = false;
+                        ServiceUtility.StopService();
                         return;
                     }
                 }
@@ -241,8 +240,6 @@ namespace TuShan.CleanDeath.Service
         {
             try
             {
-                //开始获取app的进程和缓存文件地址
-                GetAppCacheFolderPath();
                 //开始关闭进程
                 CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
                 foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
@@ -250,6 +247,11 @@ namespace TuShan.CleanDeath.Service
                     CloseProcessByName(structCleanFolder.AppExeName);
                 }
                 Thread.Sleep(100);
+                //删除注册表
+                DeleteAppRegistryByName();
+                //开始获取app的进程和缓存文件地址
+                GetAppCacheFolderPath();
+
                 //删除桌面快捷方式
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 TraverseDirectory(desktopPath, cleanDeathSetting.CleanApps);
@@ -257,7 +259,7 @@ namespace TuShan.CleanDeath.Service
                 TraverseDirectory(allDesktopPath, cleanDeathSetting.CleanApps);
                 Thread.Sleep(100);
                 //删除任务栏快捷方式
-                DeleteLnkOnTask(cleanDeathSetting.CleanApps);
+                DeleteLnkOnTask();
                 Thread.Sleep(100);
                 foreach (string path in _NeedDeleteAppFolder)
                 {
@@ -279,31 +281,26 @@ namespace TuShan.CleanDeath.Service
         /// 删除任务栏上的快捷方式
         /// </summary>
         /// <param name="CleanApps"></param>
-        private void DeleteLnkOnTask(List<AppSetttingStruct> CleanApps)
+        private void DeleteLnkOnTask()
         {
-            string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string parentDirectory = Directory.GetParent(localFolderPath).FullName;
-            string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
-            string path = Path.Combine(roamingFolderPath, "Microsoft", "Internet Explorer", "Quick Launch", "User Pinned", "TaskBar");
-            string[] files = Directory.GetFiles(path);
-            foreach (string file in files)
+            string exePath = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.DeleteTaskbarIcon.exe";
+            OpenProcessStruct model = null;
+            if (model == null)
             {
-                if (file.Contains(".lnk"))
+                model = new OpenProcessStruct
                 {
-                    string fileee = GetShortcutTarget(file);
-                    string lnkName = GetPathLinkName(file);
-                    if (CleanApps.Any(c => fileee.Contains(c.AppExeName) || c.AppFilePath.Contains(lnkName)))
-                    {
-                        File.Delete(file);
-                    }
-                }
+                    Args = "",
+                    Path = exePath,
+                    WithWindow = false
+                };
             }
+            WinAPI_Interop.CreateProcess(model.Path, Path.GetDirectoryName(model.Path), model.Args);
         }
 
         private string GetPathLinkName(string path)
         {
             string[] strings = path.Split('\\');
-            string name = strings[strings.Length - 1].Replace(".lnk","");
+            string name = strings[strings.Length - 1].Replace(".lnk", "");
             return name;
         }
 
@@ -406,6 +403,10 @@ namespace TuShan.CleanDeath.Service
                 {
                     _NeedDeleteAppFolder.Add(structCleanFolder.AppFilePath);
                     exeNameLists.Add(structCleanFolder.AppExeName);
+                    if (structCleanFolder.AppExeName.Contains(" "))
+                    {
+                        exeNameLists.Add(structCleanFolder.AppExeName.Split(' ').Last());
+                    }
                 }
             }
 
@@ -472,6 +473,20 @@ namespace TuShan.CleanDeath.Service
             }
             else
             {
+                List<Process> processList = Process.GetProcesses().ToList();
+                if (processList != null)
+                {
+                    string temppeocessName = peocessName.ToLower();
+                    Process[] processRun = processList.Where(p => !string.IsNullOrWhiteSpace(p.ProcessName) && temppeocessName.Contains(p.ProcessName))?.ToArray();
+                    if (processRun != null)
+                    {
+                        foreach (Process process in processRun)
+                        {
+                            process.Kill();
+                            TLog.Info($"关闭{peocessName}进程");
+                        }
+                    }
+                }
                 TLog.Info($"{peocessName}未运行");
             }
         }
@@ -530,6 +545,111 @@ namespace TuShan.CleanDeath.Service
                 fs.Write(randomData, 0, randomData.Length);
             }
             //TLog.Debug($"覆盖文件完成 {filePath}");
+        }
+
+        /// <summary>
+        /// 删除注册表中的所有数据
+        /// </summary>
+        private void DeleteAppRegistryByName()
+        {
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            if (cleanDeathSetting == null)
+            {
+                return;
+            }
+            //遍历32位应用程序的注册表路径
+            string keyPath32Bit = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry32, keyPath32Bit);
+
+            //遍历64位应用程序的注册表路径
+            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry64, keyPath32Bit);
+        }
+
+        private void DeleteAppsFromRegistry(CleanDeathSetting cleanDeathSetting, RegistryView registryView, string keyPath)
+        {
+            string LocalMachineName = "HKEY_LOCAL_MACHINE\\";
+            List<string> needDeletelist = new List<string>();
+            using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+            using (RegistryKey subKey = key.OpenSubKey(keyPath))
+            {
+                if (subKey != null)
+                {
+                    foreach (string subKeyName in subKey.GetSubKeyNames())
+                    {
+                        using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
+                        {
+                            string displayName = appKey.GetValue("DisplayName") as string;
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            {
+                                needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
+                            }
+
+                        }
+                    }
+                    foreach (string appKey in needDeletelist)
+                    {
+                        try
+                        {
+                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true); // 打开注册表项，第二个参数为 true 表示可写入
+
+                            if (deletekey != null)
+                            {
+                                Registry.LocalMachine.DeleteSubKeyTree(appKey);
+                                TLog.Info("注册表项删除成功:" + "appKey");
+                            }
+                            else
+                            {
+                                TLog.Info("注册表项未找到，无需删除。" + "appKey");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TLog.Info("删除注册表项时发生错误：" + "appKey" + ex.Message);
+                        }
+                    }
+                }
+            }
+            needDeletelist = new List<string>();
+            using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, registryView))
+            using (RegistryKey subKey = key.OpenSubKey(keyPath))
+            {
+                if (subKey != null)
+                {
+                    foreach (string subKeyName in subKey.GetSubKeyNames())
+                    {
+                        using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
+                        {
+                            string displayName = appKey.GetValue("DisplayName") as string;
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            {
+                                needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
+                            }
+                        }
+                    }
+                    foreach (string appKey in needDeletelist)
+                    {
+                        try
+                        {
+                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true); // 打开注册表项，第二个参数为 true 表示可写入
+
+                            if (deletekey != null)
+                            {
+                                Registry.LocalMachine.DeleteSubKeyTree(appKey);
+                                TLog.Info("注册表项删除成功:" + "appKey");
+                            }
+                            else
+                            {
+                                TLog.Info("注册表项未找到，无需删除。" + "appKey");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TLog.Info("删除注册表项时发生错误：" + "appKey" + ex.Message);
+                        }
+                    }
+                }
+            }
+
         }
 
         /// <summary>
