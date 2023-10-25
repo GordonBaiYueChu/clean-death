@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using TuShan.CleanDeath.Helps;
 using TuShan.CleanDeath.Models;
 
 namespace TuShan.CleanDeath.ViewModels
@@ -90,7 +91,7 @@ namespace TuShan.CleanDeath.ViewModels
                     string shortcutPath = files[0];
                     if (!shortcutPath.EndsWith(".exe") && !shortcutPath.EndsWith(".lnk"))
                     {
-                        HandAppExeFilePath = "请拖放一个.lnk或.exe文件。";
+                        HandAppExeFilePath = "请拖放.lnk或.exe文件。";
                         return;
                     }
                     SetAppInfoByPath(shortcutPath);
@@ -116,7 +117,7 @@ namespace TuShan.CleanDeath.ViewModels
             {
                 if (selectedFilePath.EndsWith(".lnk"))
                 {
-                    selectedFilePath = GetShortcutTarget(selectedFilePath);
+                    selectedFilePath = PathHelp.GetShortcutTarget(selectedFilePath);
                 }
 
                 string exeName = selectedFilePath;
@@ -133,28 +134,7 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 获取lnk文件的目标文件地址
-        /// </summary>
-        /// <param name="shortcutPath"></param>
-        /// <returns></returns>
-        string GetShortcutTarget(string shortcutPath)
-        {
-            try
-            {
-                Type shellType = Type.GetTypeFromProgID("WScript.Shell");
-                object shell = Activator.CreateInstance(shellType);
-                object shortcut = shellType.InvokeMember("CreateShortcut", BindingFlags.InvokeMethod, null, shell, new object[] { shortcutPath });
-                string targetPath = (string)shortcut.GetType().InvokeMember("TargetPath", BindingFlags.GetProperty, null, shortcut, null);
-                return targetPath;
-            }
-            catch (Exception ex)
-            {
-                // 处理异常，如快捷方式文件不存在或无法读取
-                Console.WriteLine("发生异常：" + ex.Message);
-                return null;
-            }
-        }
+
 
         /// <summary>
         /// 添加回调

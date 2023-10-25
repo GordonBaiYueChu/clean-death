@@ -17,14 +17,16 @@ namespace TuShan.CleanDeath
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            //配置日志文件信息
+            TLog.Configure("../Conf/Factory/log4net.config");
             if (IsAutoStartModel(e.Args))
             {
+                TLog.Info("自启动");
                 ServiceUtility.StartService();
                 Environment.Exit((int)ProcessStateCodeEnum.ExitCodeSuccess);
                 return;
             }
-            //配置日志文件信息
-            TLog.Configure("../Conf/Factory/log4net.config");
+
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
             //设置工作目录
             System.IO.Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);

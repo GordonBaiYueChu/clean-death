@@ -148,7 +148,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
-    <Compile Include="Helps\MessageHelp.cs" />
+    <Compile Include="Helps\PathHelp.cs" />
     <Compile Include="Helps\RestratHelp.cs" />
     <Compile Include="Helps\ServiceClient.cs" />
     <Compile Include="Helps\Win32Help.cs" />
@@ -187,7 +187,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="TuShan.CleanDeath_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

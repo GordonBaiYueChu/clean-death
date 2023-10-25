@@ -103,7 +103,6 @@ namespace TuShan.CleanDeath.Service
                 //初次链接设置 USERPROFILE 环境路径
                 Environment.SetEnvironmentVariable("USERPROFILE", request.USERPROFILEEnvironmentPath, EnvironmentVariableTarget.Process);
                 processPath = request.ProcessPath;
-                TLog.Debug($"接收到程序运行路径processPath: {processPath}");
                 LoopRunClean();
                 _do = false;
             }
@@ -263,11 +262,6 @@ namespace TuShan.CleanDeath.Service
                 Thread.Sleep(100);
                 foreach (string path in _NeedDeleteAppFolder)
                 {
-                    TLog.Info("待删除目录" + path);
-                }
-                foreach (string path in _NeedDeleteAppFolder)
-                {
-                    TLog.Info("删除目录" + path);
                     DeleteFolder(path);
                 }
             }
@@ -511,7 +505,6 @@ namespace TuShan.CleanDeath.Service
                     // 使用随机数据覆盖文件内容
                     OverwriteFileWithRandomData(item.FullName);
                     File.Delete(item.FullName);
-                    TLog.Info($"111 delete File {item.FullName}");
                 }
 
                 DirectoryInfo[] dirs = dirRoot.GetDirectories();
@@ -524,7 +517,6 @@ namespace TuShan.CleanDeath.Service
                     }
                     DeleteFolder(item.FullName);
                     Directory.Delete(item.FullName);
-                    TLog.Info($"111 delete Folder {item.FullName}");
                 }
             }
         }

@@ -9,6 +9,7 @@
         xmlns:cal="http://www.caliburnproject.org"
         WindowStartupLocation="CenterScreen"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        ResizeMode="NoResize"
         Height="450"
         Width="800"
         cal:Message.Attach="[Closed]=[ViewModelClosed];[Loaded]=[ViewModelLoaded]">
@@ -58,7 +59,7 @@
                             Style="{StaticResource TabControlCapsuleSolid}"
                             cal:Message.Attach="[SelectionChanged]=[TabSelectionChanged($source,$eventArgs)]">
                     <TabItem Header="文件夹设置">
-                        <Grid Margin="10"
+                        <Grid Margin="10,10,10,0"
                               Width="600">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"></RowDefinition>
@@ -68,6 +69,8 @@
                             <DataGrid x:Name="CleanFolders"
                                       Grid.Row="1"
                                       SelectedItem="{Binding SelectedCleanFolderItem}"
+                                      AllowDrop="True"
+                                      cal:Message.Attach="[Drop]=[AppFolderItemDrop($source,$eventArgs)]"
                                       Width="Auto"
                                       Height="Auto"
                                       IsReadOnly="False"
@@ -79,7 +82,9 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock HorizontalAlignment="Left"
-                                                           Text="{Binding CleanFolderPath}"></TextBlock>
+                                                           Text="{Binding CleanFolderPath}"
+                                                           ToolTip="{Binding CleanFolderPath}">
+                                                </TextBlock>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -106,20 +111,25 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Width="*"
+                                    <DataGridTemplateColumn Width="1*"
                                                             Header="删除">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Grid Margin="8,0,0,0">
+                                                <Grid Margin="-20,0,0,0">
                                                     <Button Style="{DynamicResource CloseImageButton}"
                                                             Width="Auto"
                                                             Height="Auto"
-                                                            cal:Message.Attach="[Click]=[DeleteSelectedFolder()]" />
+                                                            cal:Message.Attach="[Click]=[DeleteSelectedFolder()]"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center" />
                                                 </Grid>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
+                                <DataGrid.ToolTip>
+                                    <TextBlock>可以将一个或多个文件夹直接拖入该区域</TextBlock>
+                                </DataGrid.ToolTip>
                             </DataGrid>
                             <StackPanel Grid.Row="2"
                                         Orientation="Horizontal"
@@ -127,7 +137,7 @@
                                 <Button cal:Message.Attach="[Click]=[AddCleanFolderEvent()]"
                                         Content="添加"
                                         hc:FloatingBlock.Content="添加"
-                                        Margin="5,5"
+                                        Margin="5,0"
                                         Width="Auto" />
                                 <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
                                         Content="保存"
@@ -138,12 +148,12 @@
                         </Grid>
                     </TabItem>
                     <TabItem Header="软件设置">
-                        <Grid Margin="10"
+                        <Grid Margin="10,10,10,0"
                               Width="600"
                               x:Name="AppGrid">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"></RowDefinition>
-                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="*"></RowDefinition>
                                 <RowDefinition Height="auto"></RowDefinition>
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal">
@@ -178,8 +188,11 @@
                                           Width="600"
                                           Grid.Row="1"
                                           SelectedItem="{Binding SelectedCleanAppItem}"
+                                          AllowDrop="True"
+                                          cal:Message.Attach="[Drop]=[AppAppItemDrop($source,$eventArgs)]"
                                           IsReadOnly="False"
                                           AutoGenerateColumns="False"
+                                          ToolTip="可以将一个或多个快捷方式(.lnk)或执行文件（.exe）文件夹直接拖入该区域"
                                           CanUserAddRows="False">
                                     <DataGrid.Columns>
                                         <DataGridTemplateColumn Header="软件名称"
@@ -231,7 +244,8 @@
                             </StackPanel>
                             <StackPanel Grid.Row="2"
                                         Orientation="Horizontal"
-                                        HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
                                 <Button cal:Message.Attach="[Click]=[SaveCleanAppsEvent()]"
                                         Content="保存"
                                         hc:FloatingBlock.Content="保存"
@@ -244,10 +258,9 @@
             </StackPanel>
         </Border>
         <Border Grid.Row="1"
-                Margin="5"
                 BorderBrush="{StaticResource DarkInfoBrush}"
                 BorderThickness="0,1,0,0">
-            <StackPanel>
+            <StackPanel Margin="5">
                 <hc:NumericUpDown Width="150"
                                   Height="30"
                                   Value="{Binding MaxTimeOutDay}"

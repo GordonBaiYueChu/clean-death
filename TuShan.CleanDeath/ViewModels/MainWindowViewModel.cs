@@ -205,6 +205,36 @@ namespace TuShan.CleanDeath.ViewModels
             SettingUtility.SaveTSetting(cleanDeathSetting);
         }
 
+        /// <summary>
+        /// 拖动exe或者lnk文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void AppFolderItemDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files == null)
+                {
+                    InfoMessageShow("请拖放一个或多个文件夹。");
+                    return;
+                }
+                foreach (string path in files)
+                {
+                    //将每一个文件夹都添加到datagrid中
+                    if (Directory.Exists(path))
+                    {
+                        CleanFolderModel cleanFolderModel = new CleanFolderModel();
+                        cleanFolderModel.CleanFolderPath = path;
+                        cleanFolderModel.IsEnable = true;
+                        CleanFolders.Add(cleanFolderModel);
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region 应用选择
@@ -530,7 +560,7 @@ namespace TuShan.CleanDeath.ViewModels
         /// 手动添加要监控的软件
         /// </summary>
         /// <param name="cleanAppModel"></param>
-        public void AddAppInfoEventByHand(CleanAppModel cleanAppModel)
+        public void AddAppInfoEvent(CleanAppModel cleanAppModel)
         {
             if (cleanAppModel == null)
             {
@@ -555,8 +585,8 @@ namespace TuShan.CleanDeath.ViewModels
         public void HandAddAppInfoEvent()
         {
             AppInfoViewModel appInfoViewModel = new AppInfoViewModel();
-            appInfoViewModel.AddAppInfo -= AddAppInfoEventByHand;
-            appInfoViewModel.AddAppInfo += AddAppInfoEventByHand;
+            appInfoViewModel.AddAppInfo -= AddAppInfoEvent;
+            appInfoViewModel.AddAppInfo += AddAppInfoEvent;
             _iWindowManager.ShowDialogAsync(appInfoViewModel);
         }
 
@@ -634,6 +664,60 @@ namespace TuShan.CleanDeath.ViewModels
             if (CleanAppInfos != null && CleanAppInfos.Count > 0)
             {
                 SelectCleanAppInfo = CleanAppInfos[0];
+            }
+        }
+
+        public void AppAppItemDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files == null)
+                {
+                    InfoMessageShow("请拖放.lnk或.exe文件。");
+                }
+                bool isAllPathError = true;
+                // 检查是否是.lnk文件
+                foreach (string exePath in files)
+                {
+
+                    if (!exePath.EndsWith(".exe") && !exePath.EndsWith(".lnk"))
+                    {
+                        continue;
+                    }
+                    if (isAllPathError)
+                    {
+                        isAllPathError = false;
+                    }
+                    SetAppInfoByPath(exePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 通过选择的文件来设置app对象信息
+        /// </summary>
+        /// <param name="selectedFilePath"></param>
+        private void SetAppInfoByPath(string selectedFilePath)
+        {
+            if (!string.IsNullOrWhiteSpace(selectedFilePath))
+            {
+                if (selectedFilePath.EndsWith(".lnk"))
+                {
+                    selectedFilePath = PathHelp.GetShortcutTarget(selectedFilePath);
+                }
+
+                string exeName = selectedFilePath;
+                if (exeName.Contains("\\"))
+                {
+                    exeName = exeName.Split('\\').Last();
+                }
+                CleanAppModel cleanAppModel = new CleanAppModel();
+                cleanAppModel.AppExePath = Path.GetDirectoryName(selectedFilePath);
+                cleanAppModel.AppExeName = exeName.Replace(".exe", "");
+                cleanAppModel.AppDisplayName = exeName.Replace(".exe", "");
+                AddAppInfoEvent(cleanAppModel);
             }
         }
 

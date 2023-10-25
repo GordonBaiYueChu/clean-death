@@ -30,6 +30,7 @@ namespace TuShan.CleanDeath.Service
 
         protected override void OnStart(string[] args)
         {
+            TLog.Info("CleanDeath Service Start");
         }
 
         protected override void OnStop()
