@@ -13,6 +13,7 @@
                 <!-- Base -->
                 <ResourceDictionary Source="Resource/Style/Color.xaml" />
                 <ResourceDictionary Source="Resource/Style/Brush.xaml" />
+                <ResourceDictionary Source="Resource/Style/FontSize.xaml" />
                 <ResourceDictionary Source="Resource/Style/Geometry.xaml" />
                 <ResourceDictionary Source="Resource/Style/Style/Style.xaml" />
                 <!-- Theme -->

@@ -55,4 +55,23 @@ namespace TuShan.CleanDeath.Models
         public string GuidText { get; set; }
 
     }
+
+    /// <summary>
+    /// 打开进程
+    /// </summary>
+    public class OpenProcessStruct
+    {
+        /// <summary>
+        /// exe路径
+        /// </summary>
+        public string Path { get; set; }
+        /// <summary>
+        /// 启动参数
+        /// </summary>
+        public string Args { get; set; }
+        /// <summary>
+        /// 是否带窗口
+        /// </summary>
+        public bool WithWindow { get; set; }
+    }
 }

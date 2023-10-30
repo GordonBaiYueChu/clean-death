@@ -10,9 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Xml.Linq;
 using Caliburn.Micro;
 using HandyControl.Controls;
 using Microsoft.Win32;
@@ -23,6 +20,7 @@ using TuShan.BountyHunterDream.Setting.Setting;
 using TuShan.BountyHunterDream.Setting.Struct;
 using TuShan.CleanDeath.Helps;
 using TuShan.CleanDeath.Models;
+using TuShan.CleanDeath.Views;
 using TabControl = System.Windows.Controls.TabControl;
 
 namespace TuShan.CleanDeath.ViewModels
@@ -69,7 +67,7 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        private int _maxTimeOutDay;
+        private int _maxTimeOutDay = 1;
 
         public int MaxTimeOutDay
         {
@@ -102,10 +100,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
 
             CleanFolders = new ObservableCollection<CleanFolderModel>(cleanFolderModels);
-            if (CleanFolders != null && CleanFolders.Count > 0)
-            {
-                SelectedCleanFolderItem = CleanFolders[0];
-            }
         }
 
         /// <summary>
@@ -116,7 +110,7 @@ namespace TuShan.CleanDeath.ViewModels
             VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog
             {
                 Description = "选择文件夹",
-                UseDescriptionForTitle = true // 使用描述作为对话框的标题
+                UseDescriptionForTitle = true
             };
             if (dialog.ShowDialog() == true)
             {
@@ -157,10 +151,7 @@ namespace TuShan.CleanDeath.ViewModels
                 return;
             }
             CleanFolders.Remove(SelectedCleanFolderItem);
-            if (CleanFolders.Count > 0)
-            {
-                SelectedCleanFolderItem = CleanFolders[0];
-            }
+
         }
 
         /// <summary>
@@ -474,59 +465,6 @@ namespace TuShan.CleanDeath.ViewModels
         }
 
         /// <summary>
-        /// 删除目录,且数据不可恢复
-        /// </summary>
-        /// <param name="dir">要删除的目录</param>
-        public void DeleteFolder(string dir, List<string> notDeleteFileList = null, List<string> notDeleteFolderList = null)
-        {
-            if (System.IO.Directory.Exists(dir))
-            {
-                DirectoryInfo dirRoot = new DirectoryInfo(dir);
-                FileInfo[] files = dirRoot.GetFiles();
-                foreach (var item in files)
-                {
-                    if (notDeleteFileList != null && notDeleteFileList.Contains(item.Name))
-                    {
-                        continue;
-                    }
-                    // 使用随机数据覆盖文件内容
-                    OverwriteFileWithRandomData(item.FullName);
-                    File.Delete(item.FullName);
-                }
-
-                DirectoryInfo[] dirs = dirRoot.GetDirectories();
-
-                foreach (var item in dirs)
-                {
-                    if (notDeleteFolderList != null && notDeleteFolderList.Contains(item.Name))
-                    {
-                        continue;
-                    }
-                    DeleteFolder(item.FullName);
-                    Directory.Delete(item.FullName);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 覆盖数据
-        /// </summary>
-        /// <param name="filePath"></param>
-        private void OverwriteFileWithRandomData(string filePath)
-        {
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
-            {
-                // 创建随机数据
-                byte[] randomData = new byte[fs.Length];
-                new RNGCryptoServiceProvider().GetBytes(randomData);
-                // 覆盖文件内容
-                fs.Seek(0, SeekOrigin.Begin);
-                fs.Write(randomData, 0, randomData.Length);
-            }
-            TLog.Debug($"覆盖文件完成 {filePath}");
-        }
-
-        /// <summary>
         /// 添加软件信息
         /// </summary>
         public void AddAppInfoEvent()
@@ -766,13 +704,15 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public async void StartGuard()
         {
-            if (MessageBoxResult.No == System.Windows.MessageBox.Show("已保存所有设置？", "询问", MessageBoxButton.YesNo))
+            if (MessageBoxResult.No == MyMessageBox.Show($"已保存所有设置？\r\n*将每隔{MaxTimeOutDay}天进行用户活跃检查", CleanDeath.Views.ButtonType.YesNo, MessageType.Question))
             {
                 return;
             }
             BusyBorderShow = Visibility.Visible;
             await Task.Run(() =>
             {
+                ServiceUtility.StopService();
+                Thread.Sleep(1000);
                 RestratHelp.RunRestartTools(true);
                 //更新检测时间
                 CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
@@ -791,10 +731,495 @@ namespace TuShan.CleanDeath.ViewModels
 
         public void ViewModelClosed()
         {
-            //System.Windows.MessageBox.Show("未开启守护", "通知", MessageBoxButton.OK);
+            MyMessageBox.Show("未开启守护", CleanDeath.Views.ButtonType.OK, MessageType.Info);
         }
 
-        #endregion  
+        /// <summary>
+        /// 停止守护
+        /// </summary>
+        public async void StopCleanDeath()
+        {
+            BusyBorderShow = Visibility.Visible;
+            await Task.Run(() =>
+            {
+                //1.停止服务
+                //2.删除开机启动
+                ServiceUtility.StopService();
+                Thread.Sleep(20);
+                RestratHelp.RunRestartTools(false);
+            });
+            BusyBorderShow = Visibility.Collapsed;
+            InfoMessageShow("已停止守护");
+        }
+
+        /// <summary>
+        /// 开始立刻清理
+        /// </summary>
+        public async void StartGuardNow()
+        {
+            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
+            {
+                return;
+            }
+            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
+            {
+                return;
+            }
+
+            BusyBorderShow = Visibility.Visible;
+            await Task.Run(() =>
+            {
+                StartClean();
+            });
+            BusyBorderShow = Visibility.Collapsed;
+            InfoMessageShow("已完成清理");
+
+        }
+
+        #region 立即删除逻辑
+
+        /// <summary>
+        /// 需要删除的程序文件多线程所以用静态
+        /// </summary>
+        public static List<string> _NeedDeleteAppFolder = new List<string>();
+
+        /// <summary>
+        /// 开始清空所有
+        /// </summary>
+        private void StartClean()
+        {
+            _NeedDeleteAppFolder = new List<string>();
+            CleanFolder();
+            CleanApp();
+        }
+
+        private void CleanFolder()
+        {
+            TLog.Debug("开始删除文件");
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            foreach (StructCleanFolder structCleanFolder in cleanDeathSetting.CleanFolders)
+            {
+                if (structCleanFolder.IsEnable)
+                {
+                    try
+                    {
+                        DeleteFolder(structCleanFolder.FolderPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        TLog.Error("Delete file error :" + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private void CleanApp()
+        {
+            try
+            {
+                //开始关闭进程
+                CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+                foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+                {
+                    CloseProcessByName(structCleanFolder.AppExeName);
+                }
+                Thread.Sleep(100);
+                //删除注册表
+                DeleteAppRegistryByName();
+                //开始获取app的进程和缓存文件地址
+                GetAppCacheFolderPath();
+
+                //删除桌面快捷方式
+                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                TraverseDirectory(desktopPath, cleanDeathSetting.CleanApps);
+                string allDesktopPath = "C:\\Users\\Public\\Desktop";
+                TraverseDirectory(allDesktopPath, cleanDeathSetting.CleanApps);
+                Thread.Sleep(100);
+                //删除任务栏快捷方式
+                DeleteLnkOnTask();
+                Thread.Sleep(100);
+                foreach (string path in _NeedDeleteAppFolder)
+                {
+                    DeleteFolder(path);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// 删除任务栏上的快捷方式
+        /// </summary>
+        /// <param name="CleanApps"></param>
+        private void DeleteLnkOnTask()
+        {
+            string exePath = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.DeleteTaskbarIcon.exe";
+            Process myprocess = new Process();
+
+            ProcessStartInfo startInfo = new ProcessStartInfo(exePath);
+            myprocess.StartInfo = startInfo;
+            myprocess.Start();
+            myprocess.WaitForExit();
+
+            //退出码 1为正常，0为异常
+            if (myprocess.ExitCode != 1)
+            {
+                TLog.Error("删除任务栏快捷方式错误");
+            }
+        }
+
+        /// <summary>
+        /// 遍历文件夹
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <param name="cleanDeathSetting1"></param>
+        void TraverseDirectory(string folderPath, List<AppSetttingStruct> cleanDeathSetting)
+        {
+            try
+            {
+                if (!Directory.Exists(folderPath))
+                {
+                    return;
+                }
+                string[] files = Directory.GetFiles(folderPath);
+                foreach (string file in files)
+                {
+                    if (file.Contains(".lnk"))
+                    {
+                        string fileee = GetShortcutTarget(file);
+                        if (cleanDeathSetting.Any(c => fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName)))
+                        {
+                            File.Delete(file);
+                        }
+                    }
+                }
+                string[] subdirectories = Directory.GetDirectories(folderPath);
+                foreach (string subdirectory in subdirectories)
+                {
+                    TraverseDirectory(subdirectory, cleanDeathSetting);
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        /// <summary>
+        /// 获取快捷方式的目标地址
+        /// </summary>
+        /// <param name="shortcutPath"></param>
+        /// <returns></returns>
+        string GetShortcutTarget(string shortcutPath)
+        {
+            try
+            {
+                Type shellType = Type.GetTypeFromProgID("WScript.Shell");
+                object shell = Activator.CreateInstance(shellType);
+                object shortcut = shellType.InvokeMember("CreateShortcut", BindingFlags.InvokeMethod, null, shell, new object[] { shortcutPath });
+                string targetPath = (string)shortcut.GetType().InvokeMember("TargetPath", BindingFlags.GetProperty, null, shortcut, null);
+                return targetPath;
+            }
+            catch (Exception ex)
+            {
+                // 处理异常，如快捷方式文件不存在或无法读取
+                Console.WriteLine("发生异常：" + ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 删除app缓存
+        /// </summary>
+        /// C:\Users\Administrator\AppData
+        /// 默认应该有三个文件夹可以缓存文件 \Local \Roaming \LocalLow
+        private void GetAppCacheFolderPath()
+        {
+            _NeedDeleteAppFolder = new List<string>();
+            //12s 8s 多线程4s
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            //三个缓存文件夹路径
+            string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string parentDirectory = Directory.GetParent(localFolderPath).FullName;
+            string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
+            string localLowFolderPath = Path.Combine(parentDirectory, "LocalLow");
+            TLog.Info($"11111 {localFolderPath}");
+            TLog.Info($"22222 {roamingFolderPath}");
+            TLog.Info($"33333 {localLowFolderPath}");
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            if (cleanDeathSetting == null)
+            {
+                return;
+            }
+            List<string> exeNameLists = new List<string>();
+            foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+            {
+                //文件路径包含.
+                if (structCleanFolder.AppFilePath.Contains("."))
+                {
+                    structCleanFolder.AppFilePath = Directory.GetParent(structCleanFolder.AppFilePath).FullName;
+                }
+                if (!_NeedDeleteAppFolder.Contains(structCleanFolder.AppFilePath))
+                {
+                    _NeedDeleteAppFolder.Add(structCleanFolder.AppFilePath);
+                    exeNameLists.Add(structCleanFolder.AppExeName);
+                    if (structCleanFolder.AppExeName.Contains(" "))
+                    {
+                        exeNameLists.Add(structCleanFolder.AppExeName.Split(' ').Last());
+                    }
+                }
+            }
+
+            Task task1 = Task.Run(() =>
+            {
+                GetDeleteFloderByExeName(localFolderPath, exeNameLists, ref _NeedDeleteAppFolder);
+            });
+            Task task2 = Task.Run(() =>
+            {
+                GetDeleteFloderByExeName(roamingFolderPath, exeNameLists, ref _NeedDeleteAppFolder);
+            });
+            Task task3 = Task.Run(() =>
+            {
+                GetDeleteFloderByExeName(localLowFolderPath, exeNameLists, ref _NeedDeleteAppFolder);
+            });
+            Task[] tasks = new Task[] { task1, task2, task3 };
+            Task.WaitAll(tasks);
+            stopwatch.Stop();
+        }
+
+        private void GetDeleteFloderByExeName(string srcPath, List<string> exeNameLists, ref List<string> needDeleteFolder)
+        {
+            try
+            {
+                DirectoryInfo dirRoot = new DirectoryInfo(srcPath);
+                if (dirRoot == null)
+                {
+                    return;
+                }
+                DirectoryInfo[] dirs = dirRoot.GetDirectories();
+                if (dirs == null)
+                {
+                    return;
+                }
+                foreach (var item in dirs)
+                {
+                    if (exeNameLists.Contains(item.Name))
+                    {
+                        if (!needDeleteFolder.Contains(item.FullName))
+                        {
+                            needDeleteFolder.Add(item.FullName);
+                        }
+                    }
+                    GetDeleteFloderByExeName(item.FullName, exeNameLists, ref needDeleteFolder);
+                }
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
+        }
+
+        private void CloseProcessByName(string peocessName)
+        {
+            Process[] processes = Process.GetProcessesByName(peocessName);
+
+            if (processes.Length > 0)
+            {
+                foreach (Process process in processes)
+                {
+                    process.Kill();
+                    TLog.Info($"关闭{peocessName}进程");
+                }
+            }
+            else
+            {
+                List<Process> processList = Process.GetProcesses().ToList();
+                if (processList != null)
+                {
+                    string temppeocessName = peocessName.ToLower();
+                    Process[] processRun = processList.Where(p => !string.IsNullOrWhiteSpace(p.ProcessName) && temppeocessName.Contains(p.ProcessName))?.ToArray();
+                    if (processRun != null)
+                    {
+                        foreach (Process process in processRun)
+                        {
+                            process.Kill();
+                            TLog.Info($"关闭{peocessName}进程");
+                        }
+                    }
+                }
+                TLog.Info($"{peocessName}未运行");
+            }
+        }
+
+        /// <summary>
+        /// 删除目录,且数据不可恢复
+        /// </summary>
+        /// <param name="dir">要删除的目录</param>
+        public void DeleteFolder(string dir, List<string> notDeleteFileList = null, List<string> notDeleteFolderList = null)
+        {
+            if (System.IO.Directory.Exists(dir))
+            {
+                DirectoryInfo dirRoot = new DirectoryInfo(dir);
+                FileInfo[] files = dirRoot.GetFiles();
+                foreach (var item in files)
+                {
+                    if (notDeleteFileList != null && notDeleteFileList.Contains(item.Name))
+                    {
+                        continue;
+                    }
+                    // 使用随机数据覆盖文件内容
+                    OverwriteFileWithRandomData(item.FullName);
+                    File.Delete(item.FullName);
+                }
+
+                DirectoryInfo[] dirs = dirRoot.GetDirectories();
+
+                foreach (var item in dirs)
+                {
+                    if (notDeleteFolderList != null && notDeleteFolderList.Contains(item.Name))
+                    {
+                        continue;
+                    }
+                    DeleteFolder(item.FullName);
+                    Directory.Delete(item.FullName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 覆盖数据
+        /// </summary>
+        /// <param name="filePath"></param>
+        private void OverwriteFileWithRandomData(string filePath)
+        {
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            int writeTime = cleanDeathSetting == null ? 3 : cleanDeathSetting.WriteTime;
+            for (int i = 0; i < writeTime; i++)
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
+                {
+                    // 创建随机数据
+                    byte[] randomData = new byte[fs.Length];
+                    new RNGCryptoServiceProvider().GetBytes(randomData);
+                    // 覆盖文件内容
+                    fs.Seek(0, SeekOrigin.Begin);
+                    fs.Write(randomData, 0, randomData.Length);
+                }
+            }
+            TLog.Info($"覆盖文件完成 {filePath}");
+        }
+
+        /// <summary>
+        /// 删除注册表中的所有数据
+        /// </summary>
+        private void DeleteAppRegistryByName()
+        {
+            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            if (cleanDeathSetting == null)
+            {
+                return;
+            }
+            //遍历32位应用程序的注册表路径
+            string keyPath32Bit = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry32, keyPath32Bit);
+
+            //遍历64位应用程序的注册表路径
+            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry64, keyPath32Bit);
+        }
+
+        private void DeleteAppsFromRegistry(CleanDeathSetting cleanDeathSetting, RegistryView registryView, string keyPath)
+        {
+            string LocalMachineName = "HKEY_LOCAL_MACHINE\\";
+            List<string> needDeletelist = new List<string>();
+            using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+            using (RegistryKey subKey = key.OpenSubKey(keyPath))
+            {
+                if (subKey != null)
+                {
+                    foreach (string subKeyName in subKey.GetSubKeyNames())
+                    {
+                        using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
+                        {
+                            string displayName = appKey.GetValue("DisplayName") as string;
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            {
+                                needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
+                            }
+
+                        }
+                    }
+                    foreach (string appKey in needDeletelist)
+                    {
+                        try
+                        {
+                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true); // 打开注册表项，第二个参数为 true 表示可写入
+
+                            if (deletekey != null)
+                            {
+                                Registry.LocalMachine.DeleteSubKeyTree(appKey);
+                                TLog.Info("注册表项删除成功:" + appKey);
+                            }
+                            else
+                            {
+                                TLog.Info("注册表项未找到，无需删除。" + appKey);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TLog.Info("删除注册表项时发生错误：" + appKey + ex.Message);
+                        }
+                    }
+                }
+            }
+            needDeletelist = new List<string>();
+            using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, registryView))
+            using (RegistryKey subKey = key.OpenSubKey(keyPath))
+            {
+                if (subKey != null)
+                {
+                    foreach (string subKeyName in subKey.GetSubKeyNames())
+                    {
+                        using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
+                        {
+                            string displayName = appKey.GetValue("DisplayName") as string;
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            {
+                                needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
+                            }
+                        }
+                    }
+                    foreach (string appKey in needDeletelist)
+                    {
+                        try
+                        {
+                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true); // 打开注册表项，第二个参数为 true 表示可写入
+
+                            if (deletekey != null)
+                            {
+                                Registry.LocalMachine.DeleteSubKeyTree(appKey);
+                                TLog.Info("注册表项删除成功:" + appKey);
+                            }
+                            else
+                            {
+                                TLog.Info("注册表项未找到，无需删除。" + appKey);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TLog.Info("删除注册表项时发生错误：" + appKey + ex.Message);
+                        }
+                    }
+                }
+            }
+
+        }
+
+
+        #endregion
+
+
+        #endregion
 
         #region message
 

@@ -35,5 +35,11 @@ namespace TuShan.BountyHunterDream.Setting.Setting
         /// 需要执行清除的时间点
         /// </summary>
         public DateTime NeedCleanTime { get; set; }
+
+        /// <summary>
+        /// 写入脏数据的次数
+        /// </summary>
+        public int WriteTime { get; set; }
+
     }
 }

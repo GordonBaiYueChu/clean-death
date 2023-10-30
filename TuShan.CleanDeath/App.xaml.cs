@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using TuShan.BountyHunterDream.Logger;
 using TuShan.CleanDeath.Helps;
 using TuShan.CleanDeath.Service.Struct;
+using TuShan.CleanDeath.Views;
 
 namespace TuShan.CleanDeath
 {
@@ -26,7 +27,25 @@ namespace TuShan.CleanDeath
                 Environment.Exit((int)ProcessStateCodeEnum.ExitCodeSuccess);
                 return;
             }
-
+            //防止重复启动
+            //检查Main进程重复打开
+            var processes = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
+            if (processes.Length > 1)
+            {
+                //为了让用户在遇到未知的问题时，可以通过重启应用来解决。保证软件在任何时候都可以启动。
+                if (MyMessageBox.Show("已有相同应用再运行，是否重新打开？", ButtonType.YesNo,
+               MessageType.Question) == MessageBoxResult.Yes)
+                {
+                    ServiceUtility.StopService();
+                    //关闭以前的存在的程序，本程序继续执行即可。
+                    KillExistsProcess(processes);
+                }
+                else
+                {
+                    TLog.Info("Exit because of exist one main role.");
+                    return;
+                }
+            }
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
             //设置工作目录
             System.IO.Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
@@ -36,8 +55,32 @@ namespace TuShan.CleanDeath
                 OperateWindows.PreventAutoSleep();
             });
             //关闭可能存在的服务
-            ServiceUtility.StopService();
+            //ServiceUtility.StopService();
             base.OnStartup(e);
+        }
+
+        /// <summary>
+        /// 关闭已运行的应用
+        /// </summary>
+        /// <param name="processes"></param>
+        private void KillExistsProcess(Process[] processes)
+        {
+            int currentProcessId = Process.GetCurrentProcess().Id;
+            foreach (Process process in processes)
+            {
+                if (process.Id != currentProcessId)
+                {
+                    try
+                    {
+                        //录制中，关闭程序会触发异常恢复逻辑，所以直接kill（已停止服务不会恢复）
+                        process.Kill();
+                    }
+                    catch (Exception)
+                    {
+                        process.Kill();
+                    }
+                }
+            }
         }
 
         /// <summary>

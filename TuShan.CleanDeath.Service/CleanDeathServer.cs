@@ -240,7 +240,7 @@ namespace TuShan.CleanDeath.Service
             try
             {
                 //开始关闭进程
-                CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+                CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
                 foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
                 {
                     CloseProcessByName(structCleanFolder.AppExeName);

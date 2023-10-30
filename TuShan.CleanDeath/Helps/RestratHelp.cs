@@ -24,13 +24,13 @@ namespace TuShan.CleanDeath.Helps
             {
                 Process myprocess = new Process();
                 string path = $"{AppDomain.CurrentDomain.BaseDirectory}ReocrdRestartTools.exe";
-                string HEEGPath = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.CleanDeath.exe";
+                string autoStartProcessPath = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.CleanDeath.exe";
                 string autoArg = "AutoStart";
                 string prpoName = "TuShanCleanDeath";
 
                 //参数 0.true 设为开机启动项 1.注册表 名称 2. 注册表 值 3.自启动参数 AutoStart
                 //用; 分割
-                string args = isRecordingRecovery.ToString() + ";" + prpoName + ";" + HEEGPath.ToString() + ";" + autoArg;
+                string args = isRecordingRecovery.ToString() + ";" + prpoName + ";" + autoStartProcessPath.ToString() + ";" + autoArg;
 
                 ProcessStartInfo startInfo = new ProcessStartInfo(path, args);
                 myprocess.StartInfo = startInfo;
