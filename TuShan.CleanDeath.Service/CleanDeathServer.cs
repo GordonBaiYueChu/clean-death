@@ -185,6 +185,7 @@ namespace TuShan.CleanDeath.Service
             Task.Run(() =>
             {
                 CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
+                DateTime dateTime1 = DateTime.Now;
                 while (true)
                 {
                     if (!_isRun)
@@ -380,7 +381,7 @@ namespace TuShan.CleanDeath.Service
             TLog.Info($"11111 {localFolderPath}");
             TLog.Info($"22222 {roamingFolderPath}");
             TLog.Info($"33333 {localLowFolderPath}");
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
             if (cleanDeathSetting == null)
             {
                 return;
@@ -527,16 +528,21 @@ namespace TuShan.CleanDeath.Service
         /// <param name="filePath"></param>
         private void OverwriteFileWithRandomData(string filePath)
         {
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
+            CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
+            int writeTime = cleanDeathSetting == null ? 3 : cleanDeathSetting.WriteTime;
+            for (int i = 0; i < writeTime; i++)
             {
-                // 创建随机数据
-                byte[] randomData = new byte[fs.Length];
-                new RNGCryptoServiceProvider().GetBytes(randomData);
-                // 覆盖文件内容
-                fs.Seek(0, SeekOrigin.Begin);
-                fs.Write(randomData, 0, randomData.Length);
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
+                {
+                    // 创建随机数据
+                    byte[] randomData = new byte[fs.Length];
+                    new RNGCryptoServiceProvider().GetBytes(randomData);
+                    // 覆盖文件内容
+                    fs.Seek(0, SeekOrigin.Begin);
+                    fs.Write(randomData, 0, randomData.Length);
+                }
             }
-            //TLog.Debug($"覆盖文件完成 {filePath}");
+            TLog.Info($"覆盖文件完成 {filePath} 次数{writeTime}");
         }
 
         /// <summary>
@@ -544,7 +550,7 @@ namespace TuShan.CleanDeath.Service
         /// </summary>
         private void DeleteAppRegistryByName()
         {
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
+            CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
             if (cleanDeathSetting == null)
             {
                 return;

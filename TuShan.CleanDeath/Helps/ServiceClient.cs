@@ -225,6 +225,25 @@ namespace TuShan.CleanDeath.Helps
             }
             return port;
         }
+
+        /// <summary>
+        /// 守护服务是否正在运行
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsServiceRun()
+        {
+            string serviceName = "CleanDeathService"; // 将 "YourServiceName" 替换为要检查的服务名称
+            ServiceController[] services = ServiceController.GetServices();
+            if (services != null && services.Any(s => s.ServiceName == serviceName))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
     }
 
     public class ServiceAPI

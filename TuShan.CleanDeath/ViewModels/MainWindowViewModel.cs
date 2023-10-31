@@ -29,9 +29,11 @@ namespace TuShan.CleanDeath.ViewModels
     {
         private readonly IWindowManager _iWindowManager;
 
+        private CleanDeathSetting _cleanDeathSetting;
         public MainWindowViewModel()
         {
             _iWindowManager = IoC.Get<IWindowManager>();
+            _cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
         }
 
         #region 文件夹设置相关
@@ -84,14 +86,13 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public void CleanFoldersLoaded()
         {
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            if (cleanDeathSetting == null)
+            if (_cleanDeathSetting == null)
             {
-                cleanDeathSetting = new CleanDeathSetting();
+                _cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
             }
 
             List<CleanFolderModel> cleanFolderModels = new List<CleanFolderModel>();
-            foreach (StructCleanFolder structCleanFolder in cleanDeathSetting.CleanFolders)
+            foreach (StructCleanFolder structCleanFolder in _cleanDeathSetting.CleanFolders)
             {
                 CleanFolderModel cleanFolderModel = new CleanFolderModel();
                 cleanFolderModel.CleanFolderPath = structCleanFolder.FolderPath;
@@ -100,6 +101,7 @@ namespace TuShan.CleanDeath.ViewModels
             }
 
             CleanFolders = new ObservableCollection<CleanFolderModel>(cleanFolderModels);
+            DataWriteTime = _cleanDeathSetting.WriteTime;
         }
 
         /// <summary>
@@ -172,13 +174,12 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public void SaveCleanFolderEvent()
         {
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            if (cleanDeathSetting == null)
+            if (_cleanDeathSetting == null)
             {
-                cleanDeathSetting = new CleanDeathSetting();
+                _cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
             }
             List<CleanFolderModel> newList = new List<CleanFolderModel>();
-            cleanDeathSetting.CleanFolders = new List<StructCleanFolder>();
+            _cleanDeathSetting.CleanFolders = new List<StructCleanFolder>();
             foreach (CleanFolderModel cleanFolderModel in CleanFolders)
             {
                 if (string.IsNullOrWhiteSpace(cleanFolderModel.CleanFolderPath)
@@ -190,10 +191,10 @@ namespace TuShan.CleanDeath.ViewModels
                 StructCleanFolder structCleanFolder = new StructCleanFolder();
                 structCleanFolder.FolderPath = cleanFolderModel.CleanFolderPath;
                 structCleanFolder.IsEnable = cleanFolderModel.IsEnable;
-                cleanDeathSetting.CleanFolders.Add(structCleanFolder);
+                _cleanDeathSetting.CleanFolders.Add(structCleanFolder);
             }
             CleanFolders = new ObservableCollection<CleanFolderModel>(newList);
-            SettingUtility.SaveTSetting(cleanDeathSetting);
+            SettingUtility.SaveTSetting(_cleanDeathSetting);
         }
 
         /// <summary>
@@ -550,13 +551,12 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public void SaveCleanAppsEvent()
         {
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            if (cleanDeathSetting == null)
+            if (_cleanDeathSetting == null)
             {
-                cleanDeathSetting = new CleanDeathSetting();
+                _cleanDeathSetting = new CleanDeathSetting();
             }
             List<CleanAppModel> newList = new List<CleanAppModel>();
-            cleanDeathSetting.CleanApps = new List<AppSetttingStruct>();
+            _cleanDeathSetting.CleanApps = new List<AppSetttingStruct>();
             foreach (CleanAppModel cleanAppModel in CleanAppInfos)
             {
                 if (string.IsNullOrWhiteSpace(cleanAppModel.AppExePath)
@@ -570,10 +570,10 @@ namespace TuShan.CleanDeath.ViewModels
                 structCleanApp.AppExeName = cleanAppModel.AppExeName;
                 structCleanApp.AppFilePath = cleanAppModel.AppExePath;
                 structCleanApp.IsEnable = cleanAppModel.IsEnable;
-                cleanDeathSetting.CleanApps.Add(structCleanApp);
+                _cleanDeathSetting.CleanApps.Add(structCleanApp);
             }
             CleanAppInfos = new ObservableCollection<CleanAppModel>(newList);
-            SettingUtility.SaveTSetting(cleanDeathSetting);
+            SettingUtility.SaveTSetting(_cleanDeathSetting);
         }
 
         /// <summary>
@@ -581,14 +581,13 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public void CleanAppsLoaded()
         {
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            if (cleanDeathSetting == null)
+            if (_cleanDeathSetting == null)
             {
-                cleanDeathSetting = new CleanDeathSetting();
+                _cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
             }
 
             List<CleanAppModel> cleanFolderModels = new List<CleanAppModel>();
-            foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+            foreach (AppSetttingStruct structCleanFolder in _cleanDeathSetting.CleanApps)
             {
                 CleanAppModel cleanAppModel = new CleanAppModel();
                 cleanAppModel.AppExePath = structCleanFolder.AppFilePath;
@@ -715,10 +714,9 @@ namespace TuShan.CleanDeath.ViewModels
                 Thread.Sleep(1000);
                 RestratHelp.RunRestartTools(true);
                 //更新检测时间
-                CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-                cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
-                cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
-                SettingUtility.SaveTSetting(cleanDeathSetting);
+                _cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
+                _cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
+                SettingUtility.SaveTSetting(_cleanDeathSetting);
                 ServiceUtility.StartService();
                 //初始化服务客户端
                 ServiceClientUtility.InitClient();
@@ -731,7 +729,34 @@ namespace TuShan.CleanDeath.ViewModels
 
         public void ViewModelClosed()
         {
-            MyMessageBox.Show("未开启守护", CleanDeath.Views.ButtonType.OK, MessageType.Info);
+            if (!ServiceUtility.IsServiceRun())
+            {
+                MyMessageBox.Show("未开启守护", CleanDeath.Views.ButtonType.OK, MessageType.Info);
+            }
+        }
+
+        #region 其他功能
+
+        private int _dataWriteTime = 1;
+
+        /// <summary>
+        /// 脏数据覆盖次数
+        /// </summary>
+        public int DataWriteTime
+        {
+            get { return _dataWriteTime; }
+            set
+            {
+                _dataWriteTime = value;
+                NotifyOfPropertyChange(() => DataWriteTime);
+            }
+        }
+
+
+        public void DataWriteTimeLostFocus()
+        {
+            _cleanDeathSetting.WriteTime = DataWriteTime;
+            SettingUtility.SaveTSetting(_cleanDeathSetting);
         }
 
         /// <summary>
@@ -739,6 +764,11 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public async void StopCleanDeath()
         {
+            if (!ServiceUtility.IsServiceRun())
+            {
+                InfoMessageShow("未开始守护");
+                return;
+            }
             BusyBorderShow = Visibility.Visible;
             await Task.Run(() =>
             {
@@ -796,8 +826,7 @@ namespace TuShan.CleanDeath.ViewModels
         private void CleanFolder()
         {
             TLog.Debug("开始删除文件");
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            foreach (StructCleanFolder structCleanFolder in cleanDeathSetting.CleanFolders)
+            foreach (StructCleanFolder structCleanFolder in _cleanDeathSetting.CleanFolders)
             {
                 if (structCleanFolder.IsEnable)
                 {
@@ -818,8 +847,7 @@ namespace TuShan.CleanDeath.ViewModels
             try
             {
                 //开始关闭进程
-                CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-                foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+                foreach (AppSetttingStruct structCleanFolder in _cleanDeathSetting.CleanApps)
                 {
                     CloseProcessByName(structCleanFolder.AppExeName);
                 }
@@ -831,9 +859,9 @@ namespace TuShan.CleanDeath.ViewModels
 
                 //删除桌面快捷方式
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                TraverseDirectory(desktopPath, cleanDeathSetting.CleanApps);
+                TraverseDirectory(desktopPath, _cleanDeathSetting.CleanApps);
                 string allDesktopPath = "C:\\Users\\Public\\Desktop";
-                TraverseDirectory(allDesktopPath, cleanDeathSetting.CleanApps);
+                TraverseDirectory(allDesktopPath, _cleanDeathSetting.CleanApps);
                 Thread.Sleep(100);
                 //删除任务栏快捷方式
                 DeleteLnkOnTask();
@@ -947,13 +975,12 @@ namespace TuShan.CleanDeath.ViewModels
             TLog.Info($"11111 {localFolderPath}");
             TLog.Info($"22222 {roamingFolderPath}");
             TLog.Info($"33333 {localLowFolderPath}");
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            if (cleanDeathSetting == null)
+            if (_cleanDeathSetting == null)
             {
-                return;
+                _cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
             }
             List<string> exeNameLists = new List<string>();
-            foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
+            foreach (AppSetttingStruct structCleanFolder in _cleanDeathSetting.CleanApps)
             {
                 //文件路径包含.
                 if (structCleanFolder.AppFilePath.Contains("."))
@@ -1093,8 +1120,7 @@ namespace TuShan.CleanDeath.ViewModels
         /// <param name="filePath"></param>
         private void OverwriteFileWithRandomData(string filePath)
         {
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            int writeTime = cleanDeathSetting == null ? 3 : cleanDeathSetting.WriteTime;
+            int writeTime = _cleanDeathSetting == null ? 3 : _cleanDeathSetting.WriteTime;
             for (int i = 0; i < writeTime; i++)
             {
                 using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
@@ -1115,17 +1141,16 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         private void DeleteAppRegistryByName()
         {
-            CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            if (cleanDeathSetting == null)
+            if (_cleanDeathSetting == null)
             {
                 return;
             }
             //遍历32位应用程序的注册表路径
             string keyPath32Bit = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
-            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry32, keyPath32Bit);
+            DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry32, keyPath32Bit);
 
             //遍历64位应用程序的注册表路径
-            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry64, keyPath32Bit);
+            DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry64, keyPath32Bit);
         }
 
         private void DeleteAppsFromRegistry(CleanDeathSetting cleanDeathSetting, RegistryView registryView, string keyPath)
@@ -1218,6 +1243,7 @@ namespace TuShan.CleanDeath.ViewModels
 
         #endregion
 
+        #endregion
 
         #endregion
 

@@ -271,16 +271,28 @@
                             </Grid.RowDefinitions>
                             <StackPanel  Grid.Row="0"
                                          HorizontalAlignment="Center">
+                                <hc:NumericUpDown Width="160"
+                                                  Margin="10"
+                                                  Height="30"
+                                                  Value="{Binding DataWriteTime,Mode=TwoWay}"
+                                                  Minimum="1"
+                                                  Maximum="20"
+                                                  ToolTip="建议设置为10次以内"
+                                                  hc:InfoElement.TitleWidth="100"
+                                                  hc:InfoElement.TitlePlacement="Left"
+                                                  hc:InfoElement.Title="脏数据覆盖次数:"
+                                                  cal:Message.Attach="[LostFocus]=[DataWriteTimeLostFocus()]"
+                                                  Style="{StaticResource NumericUpDownPlus}" />
                                 <Button HorizontalAlignment="Right"
                                         Margin="10"
                                         VerticalAlignment="Bottom"
                                         Background="Red"
                                         cal:Message.Attach="[Click]=[StopCleanDeath()]">停止守护</Button>
-                                <Button  HorizontalAlignment="Right"
-                                         Margin="10"
-                                         VerticalAlignment="Bottom"
-                                         Background="Red"
-                                         cal:Message.Attach="[Click]=[StartGuardNow()]">立即清理</Button>
+                                <Button HorizontalAlignment="Right"
+                                        Margin="10"
+                                        VerticalAlignment="Bottom"
+                                        Background="Red"
+                                        cal:Message.Attach="[Click]=[StartGuardNow()]">立即清理</Button>
 
                             </StackPanel>
                         </Grid>
@@ -294,22 +306,25 @@
                                         Value="2" />
                             </Style>
                         </TabItem.Resources>
-                        <StackPanel Grid.Row="1"
-                                    Margin="20,10,0,0"
-                                    Width="500">
-                            <TextBlock>版权：Copyright ©  2023</TextBlock>
-                            <TextBlock>版本：V 0.0.0.1        （*后续版本免费更新，请注意查阅商家发布信息）</TextBlock>
-                            <TextBlock>说明：</TextBlock>
-                            <TextBlock> 1.适用于windows10,windows11系统。</TextBlock>
-                            <TextBlock> 2.无广告，不会请求或窃取任何用户数据，可在不联网状态下使用。</TextBlock>
-                            <TextBlock TextWrapping="Wrap"> 3.通过检测用户登录windows的时间，如果距用户上次结束使用的时间间隔大于用户设置的【检测间隔】时间，
+                        <Grid Margin="10,10,10,0"
+                              Width="600">
+                            <StackPanel Grid.Row="1"
+                                        Margin="20,10,0,0"
+                                        Width="500">
+                                <TextBlock>版权：Copyright ©  2023</TextBlock>
+                                <TextBlock>版本：V 0.0.0.1        （*后续版本免费更新，请注意查阅商家发布信息）</TextBlock>
+                                <TextBlock>说明：</TextBlock>
+                                <TextBlock> 1.适用于windows10,windows11系统。</TextBlock>
+                                <TextBlock> 2.无广告，不会请求或窃取任何用户数据，可在不联网状态下使用。</TextBlock>
+                                <TextBlock> 3.需要开机自启动权限和部分管理员权限删除数据。</TextBlock>
+                                <TextBlock TextWrapping="Wrap"> 4.通过检测用户登录windows的时间，如果距用户上次结束使用的时间间隔大于用户设置的【检测间隔】时间，
                                 则开始对用户指定的数据或应用进行删除操作。</TextBlock>
-                            <TextBlock> 4.出现无法使用或其他异常情况请及时联系商家。</TextBlock>
-                            <TextBlock>注意事项：</TextBlock>
-                            <TextBlock> 1.删除的文件恢复较为困难，请合理使用。</TextBlock>
-                            <TextBlock> 2.需要开机自启动权限和部分管理员权限。</TextBlock>
-                            <TextBlock> 3.盗版可能会导致电脑文件异常删除，请注意识别。</TextBlock>
-                        </StackPanel>
+                                <TextBlock> 5.出现无法使用或其他异常情况请及时联系商家。</TextBlock>
+                                <TextBlock>注意事项：</TextBlock>
+                                <TextBlock> 1.删除的文件恢复较为困难，请合理使用。</TextBlock>
+                                <TextBlock> 2.盗版可能会导致电脑文件异常删除，请注意识别。</TextBlock>
+                            </StackPanel>
+                        </Grid>
                     </TabItem>
                 </TabControl>
             </StackPanel>
@@ -327,6 +342,7 @@
                                   Height="30"
                                   Value="{Binding MaxTimeOutDay,Mode=TwoWay}"
                                   Minimum="1"
+                                  ToolTip="1天为24小时"
                                   hc:InfoElement.TitleWidth="80"
                                   hc:InfoElement.TitlePlacement="Left"
                                   hc:InfoElement.Title="检测间隔(天):"
@@ -358,7 +374,7 @@
                         Margin="0,10,10,10"
                         SizeChanged="StackPanel_SizeChanged" />
         </ScrollViewer>
-        <Border Grid.RowSpan="3"
+        <!--<Border Grid.RowSpan="3"
                 Visibility="{Binding BusyBorderShow}"
                 Background="{StaticResource MainContentForegroundBrush}"
                 Opacity="0.9">
@@ -376,6 +392,6 @@
                                 Foreground="BlueViolet"
                                 Style="{StaticResource LoadingLineLarge}" />
             </StackPanel>
-        </Border>
+        </Border>-->
     </Grid>
 </Window>
