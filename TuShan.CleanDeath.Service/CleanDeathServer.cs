@@ -244,7 +244,10 @@ namespace TuShan.CleanDeath.Service
                 CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
                 foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
                 {
-                    CloseProcessByName(structCleanFolder.AppExeName);
+                    if (structCleanFolder.IsEnable)
+                    {
+                        CloseProcessByName(structCleanFolder.AppExeName);
+                    }
                 }
                 Thread.Sleep(100);
                 //删除注册表
@@ -318,7 +321,7 @@ namespace TuShan.CleanDeath.Service
                     if (file.Contains(".lnk"))
                     {
                         string fileee = GetShortcutTarget(file);
-                        if (cleanDeathSetting.Any(c => fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName)))
+                        if (cleanDeathSetting.Any(c => c.IsEnable &&( fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName))))
                         {
                             File.Delete(file);
                         }
@@ -389,6 +392,10 @@ namespace TuShan.CleanDeath.Service
             List<string> exeNameLists = new List<string>();
             foreach (AppSetttingStruct structCleanFolder in cleanDeathSetting.CleanApps)
             {
+                if (!structCleanFolder.IsEnable)
+                {
+                    continue;
+                }
                 //文件路径包含.
                 if (structCleanFolder.AppFilePath.Contains("."))
                 {
@@ -577,7 +584,7 @@ namespace TuShan.CleanDeath.Service
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
-                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && c.IsEnable && displayName.Contains(c.AppDisplayName)))
                             {
                                 needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
                             }
@@ -618,7 +625,7 @@ namespace TuShan.CleanDeath.Service
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
-                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && c.IsEnable && displayName.Contains(c.AppDisplayName)))
                             {
                                 needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
                             }

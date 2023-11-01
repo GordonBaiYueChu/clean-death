@@ -430,6 +430,10 @@ namespace TuShan.CleanDeath.ViewModels
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
+                            //if (displayName != null && displayName.Contains("搜狗"))
+                            //{
+
+                            //}
                             // 排除系统应用 systemComponent == 1
                             int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
                             if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
@@ -1151,6 +1155,11 @@ namespace TuShan.CleanDeath.ViewModels
 
             //遍历64位应用程序的注册表路径
             DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry64, keyPath32Bit);
+
+            //可能一些特殊应用存在如下位置
+            string keyPath64Bit = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
+            DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry32, keyPath64Bit);
+            DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry64, keyPath64Bit);
         }
 
         private void DeleteAppsFromRegistry(CleanDeathSetting cleanDeathSetting, RegistryView registryView, string keyPath)

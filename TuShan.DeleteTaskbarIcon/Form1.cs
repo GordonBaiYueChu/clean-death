@@ -56,7 +56,7 @@ namespace TuShan.DeleteTaskbarIcon
                     {
                         string fileee = GetShortcutTarget(file);
                         string lnkName = GetPathLinkName(file);
-                        if (CleanApps.Any(c => fileee.Contains(c.AppExeName) || c.AppExeName.Contains(lnkName)))
+                        if (CleanApps.Any(c => c.IsEnable &&( fileee.Contains(c.AppExeName) || c.AppExeName.Contains(lnkName))))
                         {
                             Shell shell = new Shell();
                             Folder folder = shell.NameSpace(Path.GetDirectoryName(file));
