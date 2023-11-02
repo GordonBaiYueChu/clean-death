@@ -853,6 +853,10 @@ namespace TuShan.CleanDeath.ViewModels
                 //开始关闭进程
                 foreach (AppSetttingStruct structCleanFolder in _cleanDeathSetting.CleanApps)
                 {
+                    if (!structCleanFolder.IsEnable)
+                    {
+                        continue;
+                    }
                     CloseProcessByName(structCleanFolder.AppExeName);
                 }
                 Thread.Sleep(100);
@@ -877,7 +881,7 @@ namespace TuShan.CleanDeath.ViewModels
             }
             catch (Exception ex)
             {
-
+                TLog.Error($"CleanApp error {ex.Message}");
             }
         }
 
@@ -921,7 +925,7 @@ namespace TuShan.CleanDeath.ViewModels
                     if (file.Contains(".lnk"))
                     {
                         string fileee = GetShortcutTarget(file);
-                        if (cleanDeathSetting.Any(c => fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName)))
+                        if (cleanDeathSetting.Any(c => c.IsEnable &&( fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName))))
                         {
                             File.Delete(file);
                         }
@@ -976,9 +980,6 @@ namespace TuShan.CleanDeath.ViewModels
             string parentDirectory = Directory.GetParent(localFolderPath).FullName;
             string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
             string localLowFolderPath = Path.Combine(parentDirectory, "LocalLow");
-            TLog.Info($"11111 {localFolderPath}");
-            TLog.Info($"22222 {roamingFolderPath}");
-            TLog.Info($"33333 {localLowFolderPath}");
             if (_cleanDeathSetting == null)
             {
                 _cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
@@ -986,6 +987,10 @@ namespace TuShan.CleanDeath.ViewModels
             List<string> exeNameLists = new List<string>();
             foreach (AppSetttingStruct structCleanFolder in _cleanDeathSetting.CleanApps)
             {
+                if (!structCleanFolder.IsEnable)
+                {
+                    continue;
+                }
                 //文件路径包含.
                 if (structCleanFolder.AppFilePath.Contains("."))
                 {
@@ -1137,7 +1142,6 @@ namespace TuShan.CleanDeath.ViewModels
                     fs.Write(randomData, 0, randomData.Length);
                 }
             }
-            TLog.Info($"覆盖文件完成 {filePath}");
         }
 
         /// <summary>
@@ -1176,7 +1180,7 @@ namespace TuShan.CleanDeath.ViewModels
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
-                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.IsEnable &&  c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
                             {
                                 needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
                             }
@@ -1217,7 +1221,7 @@ namespace TuShan.CleanDeath.ViewModels
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
-                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.IsEnable && c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
                             {
                                 needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
                             }

@@ -222,17 +222,19 @@ namespace TuShan.CleanDeath.Service
             CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
             foreach (StructCleanFolder structCleanFolder in cleanDeathSetting.CleanFolders)
             {
-                if (structCleanFolder.IsEnable)
+                if (!structCleanFolder.IsEnable)
                 {
-                    try
-                    {
-                        DeleteFolder(structCleanFolder.FolderPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        TLog.Error("Delete file error :" + ex.Message);
-                    }
+                    continue;
                 }
+                try
+                {
+                    DeleteFolder(structCleanFolder.FolderPath);
+                }
+                catch (Exception ex)
+                {
+                    TLog.Error("Delete file error :" + ex.Message);
+                }
+
             }
         }
 
@@ -321,7 +323,7 @@ namespace TuShan.CleanDeath.Service
                     if (file.Contains(".lnk"))
                     {
                         string fileee = GetShortcutTarget(file);
-                        if (cleanDeathSetting.Any(c => c.IsEnable &&( fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName))))
+                        if (cleanDeathSetting.Any(c => c.IsEnable && (fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName))))
                         {
                             File.Delete(file);
                         }
@@ -381,9 +383,6 @@ namespace TuShan.CleanDeath.Service
             string parentDirectory = Directory.GetParent(localFolderPath).FullName;
             string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
             string localLowFolderPath = Path.Combine(parentDirectory, "LocalLow");
-            TLog.Info($"11111 {localFolderPath}");
-            TLog.Info($"22222 {roamingFolderPath}");
-            TLog.Info($"33333 {localLowFolderPath}");
             CleanDeathSetting cleanDeathSetting = ReadCleanDeathSetting();
             if (cleanDeathSetting == null)
             {
@@ -568,6 +567,11 @@ namespace TuShan.CleanDeath.Service
 
             //遍历64位应用程序的注册表路径
             DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry64, keyPath32Bit);
+
+            //可能一些特殊应用存在如下位置
+            string keyPath64Bit = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
+            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry32, keyPath64Bit);
+            DeleteAppsFromRegistry(cleanDeathSetting, RegistryView.Registry64, keyPath64Bit);
         }
 
         private void DeleteAppsFromRegistry(CleanDeathSetting cleanDeathSetting, RegistryView registryView, string keyPath)
