@@ -10,11 +10,6 @@ namespace TuShan.CleanDeath.Service.Utility
     public class WinAPI_Interop
     {
         public static IntPtr WTS_CURRENT_SERVER_HANDLE = IntPtr.Zero;
-        /// <summary>
-        /// 服务程序执行消息提示,前台MessageBox.Show
-        /// </summary>
-        /// <param name="message">消息内容</param>
-        /// <param name="title">标题</param>
         public static void ShowServiceMessage(string message, string title)
         {
             int resp = 0;
@@ -66,11 +61,6 @@ namespace TuShan.CleanDeath.Service.Utility
         #endregion
 
         #region P/Invoke CreateProcessAsUser
-        /// <summary> 
-        /// Struct, Enum and P/Invoke Declarations for CreateProcessAsUser. 
-        /// </summary> 
-        ///  
-
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         struct STARTUPINFO
         {
@@ -103,21 +93,6 @@ namespace TuShan.CleanDeath.Service.Utility
             public int dwThreadId;
         }
 
-        /// <summary>
-        /// 以当前登录的windows用户(角色权限)运行指定程序进程
-        /// </summary>
-        /// <param name="hToken"></param>
-        /// <param name="lpApplicationName">指定程序(全路径)</param>
-        /// <param name="lpCommandLine">参数</param>
-        /// <param name="lpProcessAttributes">进程属性</param>
-        /// <param name="lpThreadAttributes">线程属性</param>
-        /// <param name="bInheritHandles"></param>
-        /// <param name="dwCreationFlags"></param>
-        /// <param name="lpEnvironment"></param>
-        /// <param name="lpCurrentDirectory"></param>
-        /// <param name="lpStartupInfo">程序启动属性</param>
-        /// <param name="lpProcessInformation">最后返回的进程信息</param>
-        /// <returns>是否调用成功</returns>
         [DllImport("ADVAPI32.DLL", SetLastError = true, CharSet = CharSet.Auto)]
         static extern bool CreateProcessAsUser(IntPtr hToken, string lpApplicationName, string lpCommandLine, IntPtr lpProcessAttributes, IntPtr lpThreadAttributes,
                                                       bool bInheritHandles, uint dwCreationFlags, string lpEnvironment, string lpCurrentDirectory,
@@ -127,21 +102,17 @@ namespace TuShan.CleanDeath.Service.Utility
         static extern bool CloseHandle(IntPtr hHandle);
         #endregion
 
-        /// <summary>
-        /// 以当前登录系统的用户角色权限启动指定的进程
-        /// </summary>
-        /// <param name="ChildProcName">指定的进程(全路径)</param>
         public static int CreateProcess(string ChildProcName, string workPath, string arguments)
         {
             IntPtr ppSessionInfo = IntPtr.Zero;
             UInt32 SessionCount = 0;
             int processID = 0;
             if (WTSEnumerateSessions(
-                                    (IntPtr)WTS_CURRENT_SERVER_HANDLE,  // Current RD Session Host Server handle would be zero. 
-                                    0,  // This reserved parameter must be zero. 
-                                    1,  // The version of the enumeration request must be 1. 
-                                    ref ppSessionInfo, // This would point to an array of session info. 
-                                    ref SessionCount  // This would indicate the length of the above array.
+                                    (IntPtr)WTS_CURRENT_SERVER_HANDLE,            
+                                    0,         
+                                    1,            
+                                    ref ppSessionInfo,           
+                                    ref SessionCount           
                                     ))
             {
                 for (int nCount = 0; nCount < SessionCount; nCount++)
@@ -156,17 +127,17 @@ namespace TuShan.CleanDeath.Service.Utility
                             STARTUPINFO tStartUpInfo = new STARTUPINFO();
                             tStartUpInfo.cb = Marshal.SizeOf(typeof(STARTUPINFO));
                             bool ChildProcStarted = CreateProcessAsUser(
-                                                                        hToken,             // Token of the logged-on user. 
-                                                                        ChildProcName,      // Name of the process to be started. 
-                                                                        arguments,               // Any command line arguments to be passed. 
-                                                                        IntPtr.Zero,        // Default Process' attributes. 
-                                                                        IntPtr.Zero,        // Default Thread's attributes. 
-                                                                        false,              // Does NOT inherit parent's handles. 
-                                                                        0,                  // No any specific creation flag. 
-                                                                        null,               // Default environment path. 
-                                                                        workPath,               // Default current directory. 
-                                                                        ref tStartUpInfo,   // Process Startup Info.  
-                                                                        out tProcessInfo    // Process information to be returned. 
+                                                                        hToken,                   
+                                                                        ChildProcName,              
+                                                                        arguments,                       
+                                                                        IntPtr.Zero,            
+                                                                        IntPtr.Zero,            
+                                                                        false,                    
+                                                                        0,                        
+                                                                        null,                   
+                                                                        workPath,                   
+                                                                        ref tStartUpInfo,        
+                                                                        out tProcessInfo          
                                                      );
                             if (ChildProcStarted)
                             {

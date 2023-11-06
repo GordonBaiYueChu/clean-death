@@ -24,9 +24,6 @@ namespace TuShan.CleanDeath.Models
 
         private string _cleanFolderPath;
 
-        /// <summary>
-        /// 监护的文件夹地址
-        /// </summary>
         public string CleanFolderPath
         {
             get { return _cleanFolderPath; }
@@ -39,9 +36,6 @@ namespace TuShan.CleanDeath.Models
 
         private bool _isEnable;
 
-        /// <summary>
-        /// 是否启用
-        /// </summary>
         public bool IsEnable
         {
             get { return _isEnable; }
@@ -56,22 +50,10 @@ namespace TuShan.CleanDeath.Models
 
     }
 
-    /// <summary>
-    /// 打开进程
-    /// </summary>
     public class OpenProcessStruct
     {
-        /// <summary>
-        /// exe路径
-        /// </summary>
         public string Path { get; set; }
-        /// <summary>
-        /// 启动参数
-        /// </summary>
         public string Args { get; set; }
-        /// <summary>
-        /// 是否带窗口
-        /// </summary>
         public bool WithWindow { get; set; }
     }
 }

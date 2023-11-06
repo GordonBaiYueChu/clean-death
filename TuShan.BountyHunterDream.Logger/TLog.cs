@@ -10,9 +10,6 @@ using System.Threading.Tasks;
 
 namespace TuShan.BountyHunterDream.Logger
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class TLog
     {
         public static void Configure(string p_configFile)

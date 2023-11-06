@@ -16,16 +16,10 @@ namespace TuShan.CleanDeath.ViewModels
 {
     public class AppInfoViewModel : Caliburn.Micro.Screen
     {
-        /// <summary>
-        /// 应用程序信息
-        /// </summary>
         public Action<CleanAppModel> AddAppInfo;
 
         private string _handAppExeFilePath;
 
-        /// <summary>
-        /// 软件运行地址
-        /// </summary>
         public string HandAppExeFilePath
         {
             get { return _handAppExeFilePath; }
@@ -38,9 +32,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private string _handAppDisplayName;
 
-        /// <summary>
-        /// 程序名称
-        /// </summary>
         public string HandAppDisplayName
         {
             get { return _handAppDisplayName; }
@@ -57,9 +48,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private CleanAppModel _cleanAppModel;
 
-        /// <summary>
-        /// 用户选择文件
-        /// </summary>
         public void SelectedAppExeFile()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -74,18 +62,12 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 拖动exe或者lnk文件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void AppExePathDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 
-                // 检查是否是.lnk文件
                 if (files != null && files.Length == 1)
                 {
                     string shortcutPath = files[0];
@@ -103,10 +85,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 通过选择的文件来设置app对象信息
-        /// </summary>
-        /// <param name="selectedFilePath"></param>
         private void SetAppInfoByPath(string selectedFilePath)
         {
             if (!selectedFilePath.EndsWith(".exe") && !selectedFilePath.EndsWith(".lnk"))
@@ -136,9 +114,6 @@ namespace TuShan.CleanDeath.ViewModels
 
 
 
-        /// <summary>
-        /// 添加回调
-        /// </summary>
         public void SaveCleanAppEvent()
         {
             AddAppInfo?.Invoke(_cleanAppModel);

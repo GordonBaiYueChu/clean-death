@@ -32,20 +32,16 @@ namespace ReocrdRestartTools
                     return;
                 }
 
-                //是否设为开机启动项
                 bool isContinueRecord = Convert.ToBoolean(needArgs[0]);
                 string prpoName = needArgs[1];
                 string prpoPath = needArgs[2];
                 string autoArg = needArgs[3];
-                //找到LocalMachine节点
                 RegistryKey registryRoot = Registry.CurrentUser;
 
-                //找到注册表路径
                 string runRootPath = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
 
                 RegistryKey runRoot = registryRoot.OpenSubKey(runRootPath, true);
 
-                //isContinueRecord :true 添加 ，false 删除
                 ChangedRegistryValue(isContinueRecord, runRoot, prpoName, prpoPath + " " + autoArg);
 
                 Environment.Exit(1);
@@ -57,13 +53,6 @@ namespace ReocrdRestartTools
 
         }
 
-        /// <summary>
-        /// 修改注册表属性信息
-        /// </summary>
-        /// <param name="isContinueRecord">//true 添加 ，false 删除</param>
-        /// <param name="runRoot">要修改的节点</param>
-        /// <param name="prpoName">字段名</param>
-        /// <param name="value">字段值</param>
         private static void ChangedRegistryValue(bool isContinueRecord, RegistryKey runRoot, string prpoName, string value)
         {
             if (runRoot == null)

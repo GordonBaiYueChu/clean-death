@@ -14,10 +14,6 @@ namespace TuShan.CleanDeath.Helps
 {
     public class RestratHelp
     {
-        /// <summary>
-        /// 启动设置录制恢复程序
-        /// </summary>
-        /// <param name="isRecordingRecovery"></param>
         public static bool RunRestartTools(bool isRecordingRecovery)
         {
             try
@@ -28,8 +24,6 @@ namespace TuShan.CleanDeath.Helps
                 string autoArg = "AutoStart";
                 string prpoName = "TuShanCleanDeath";
 
-                //参数 0.true 设为开机启动项 1.注册表 名称 2. 注册表 值 3.自启动参数 AutoStart
-                //用; 分割
                 string args = isRecordingRecovery.ToString() + ";" + prpoName + ";" + autoStartProcessPath.ToString() + ";" + autoArg;
 
                 ProcessStartInfo startInfo = new ProcessStartInfo(path, args);
@@ -37,7 +31,6 @@ namespace TuShan.CleanDeath.Helps
                 myprocess.Start();
                 myprocess.WaitForExit();
 
-                //退出码 1为正常，0为异常
                 if (myprocess.ExitCode != 1)
                 {
                     return false;

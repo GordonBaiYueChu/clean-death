@@ -6,18 +6,9 @@ using System.Threading.Tasks;
 
 namespace TuShan.CleanDeath.Service.Struct
 {
-    /// <summary>
-    /// 程序关闭返回值
-    /// </summary>
     public enum ProcessStateCodeEnum
     {
-        /// <summary>
-        /// 正常关闭
-        /// </summary>
         ExitCodeSuccess = -111,
-        /// <summary>
-        /// 未知关闭
-        /// </summary>
         ExitCodeUnKnown = -1000
     }
 }

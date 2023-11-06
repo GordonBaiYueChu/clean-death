@@ -23,9 +23,6 @@ namespace TuShan.CleanDeath.Models
 
         private string appDisplayName;
 
-        /// <summary>
-        /// 应用程序名称
-        /// </summary>
         public string AppDisplayName
         {
             get { return appDisplayName; }
@@ -38,9 +35,6 @@ namespace TuShan.CleanDeath.Models
 
         private string appExeName;
 
-        /// <summary>
-        /// 应用程序员exe名称chrome.exe
-        /// </summary>
         public string AppExeName
         {
             get { return appExeName; }
@@ -53,9 +47,6 @@ namespace TuShan.CleanDeath.Models
 
         private string appExePath;
 
-        /// <summary>
-        /// 应用程序员exe路径，先关进程再卸载 C:\Program Files\Google\Chrome\Application\chrome.exe,0
-        /// </summary>
         public string AppExePath
         {
             get { return appExePath; }
@@ -68,9 +59,6 @@ namespace TuShan.CleanDeath.Models
 
         private bool _isEnable;
 
-        /// <summary>
-        /// 是否启用
-        /// </summary>
         public bool IsEnable
         {
             get { return _isEnable; }

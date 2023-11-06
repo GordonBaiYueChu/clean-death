@@ -40,9 +40,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private ObservableCollection<CleanFolderModel> _cleanFolders = new ObservableCollection<CleanFolderModel>();
 
-        /// <summary>
-        /// 监控文件夹地址集合
-        /// </summary>
         public ObservableCollection<CleanFolderModel> CleanFolders
         {
             get { return _cleanFolders; }
@@ -56,9 +53,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private CleanFolderModel _selectedCleanFolderItem;
 
-        /// <summary>
-        /// 选中的监控文件夹
-        /// </summary>
         public CleanFolderModel SelectedCleanFolderItem
         {
             get { return _selectedCleanFolderItem; }
@@ -81,9 +75,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 加载配置数据
-        /// </summary>
         public void CleanFoldersLoaded()
         {
             if (_cleanDeathSetting == null)
@@ -104,9 +95,6 @@ namespace TuShan.CleanDeath.ViewModels
             DataWriteTime = _cleanDeathSetting.WriteTime;
         }
 
-        /// <summary>
-        /// 选择要监控的文件夹
-        /// </summary>
         public void SelectedFolder()
         {
             VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog
@@ -123,11 +111,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 更新启用的值
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void UseOnActiveChecked(object sender, System.Windows.RoutedEventArgs e)
         {
             System.Windows.Controls.CheckBox box = sender as System.Windows.Controls.CheckBox;
@@ -143,9 +126,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 删除监护文件夹
-        /// </summary>
         public void DeleteSelectedFolder()
         {
             if (CleanFolders == null)
@@ -156,9 +136,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         }
 
-        /// <summary>
-        /// 添加空吧监控文件夹地址
-        /// </summary>
         public void AddCleanFolderEvent()
         {
             CleanFolderModel cleanFolderModel = new CleanFolderModel();
@@ -169,9 +146,6 @@ namespace TuShan.CleanDeath.ViewModels
             CleanFolders.Add(cleanFolderModel);
         }
 
-        /// <summary>
-        /// 保存用户选中的数据
-        /// </summary>
         public void SaveCleanFolderEvent()
         {
             if (_cleanDeathSetting == null)
@@ -197,11 +171,6 @@ namespace TuShan.CleanDeath.ViewModels
             SettingUtility.SaveTSetting(_cleanDeathSetting);
         }
 
-        /// <summary>
-        /// 拖动exe或者lnk文件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void AppFolderItemDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -215,7 +184,6 @@ namespace TuShan.CleanDeath.ViewModels
                 }
                 foreach (string path in files)
                 {
-                    //将每一个文件夹都添加到datagrid中
                     if (Directory.Exists(path))
                     {
                         CleanFolderModel cleanFolderModel = new CleanFolderModel();
@@ -233,9 +201,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private ObservableCollection<AppRegistryModel> _allAppNames;
 
-        /// <summary>
-        /// 注册表中所有应用名称
-        /// </summary>
         public ObservableCollection<AppRegistryModel> AllAppInfos
         {
             get { return _allAppNames; }
@@ -248,9 +213,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private AppRegistryModel _selectedAppInfo;
 
-        /// <summary>
-        /// 选中的软件名称
-        /// </summary>
         public AppRegistryModel SelectedAppInfo
         {
             get { return _selectedAppInfo; }
@@ -263,9 +225,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private ObservableCollection<CleanAppModel> _cleanAppInfos = new ObservableCollection<CleanAppModel>();
 
-        /// <summary>
-        /// 用户选择的app列表
-        /// </summary>
         public ObservableCollection<CleanAppModel> CleanAppInfos
         {
             get { return _cleanAppInfos; }
@@ -278,9 +237,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private CleanAppModel _selectCleanAppInfo;
 
-        /// <summary>
-        /// 选中的待清理的app信息
-        /// </summary>
         public CleanAppModel SelectCleanAppInfo
         {
             get { return _selectCleanAppInfo; }
@@ -292,18 +248,11 @@ namespace TuShan.CleanDeath.ViewModels
         }
 
 
-        /// <summary>
-        /// 获取本机电脑上所有应用名称
-        /// </summary>
         private void GetAllAppNames()
         {
             GetAllAppNamesByRegistry();
-            //GetSomeAppNotInRegistry();
         }
 
-        /// <summary>
-        /// 获取一些不在注册表中的app，完全写死,从配置中读取，并暴露给用户，用户可自定义
-        /// </summary>
         private void GetSomeAppNotInRegistry()
         {
             SystemSetting systemSetting = SettingUtility.GetTSetting<SystemSetting>();
@@ -332,23 +281,13 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 通过注册表获取所有已安装应用程序数据
-        /// </summary>
         private void GetAllAppNamesByRegistry()
         {
             List<AppRegistryModel> installedApps = new List<AppRegistryModel>();
 
-            // 遍历32位应用程序的注册表路径
             string keyPath32Bit = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
             GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry32, keyPath32Bit);
-            // 遍历64位应用程序的注册表路径
             GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry64, keyPath32Bit);
-
-            //可能一些特殊应用存在如下位置
-            //string keyPath64Bit = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
-            //GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry32, keyPath64Bit);
-            //GetInstalledAppsFromRegistry(installedApps, RegistryView.Registry64, keyPath64Bit);
 
             installedApps = installedApps.OrderBy(i => i.AppDisplayName).ToList();
             AllAppInfos = new ObservableCollection<AppRegistryModel>(installedApps);
@@ -367,23 +306,6 @@ namespace TuShan.CleanDeath.ViewModels
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
 
-                            //if (displayName != null && displayName.Contains("搜狗"))
-                            //{
-
-                            //}
-                            //if (subKeyName != null && subKeyName.Contains("Moz"))
-                            //{ 
-
-                            //}
-
-                            //foreach (string valueName in appKey.GetValueNames())
-                            //{
-                            //    string valueData = appKey.GetValue(valueName) as string;
-                            //    Console.WriteLine("启动项名称：" + valueName);
-                            //    Console.WriteLine("应用程序路径：" + valueData);
-                            //}
-
-                            // 排除系统应用 systemComponent == 1
                             int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
                             if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
                             {
@@ -430,11 +352,6 @@ namespace TuShan.CleanDeath.ViewModels
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
-                            //if (displayName != null && displayName.Contains("搜狗"))
-                            //{
-
-                            //}
-                            // 排除系统应用 systemComponent == 1
                             int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
                             if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
                             {
@@ -469,9 +386,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         }
 
-        /// <summary>
-        /// 添加软件信息
-        /// </summary>
         public void AddAppInfoEvent()
         {
             if (SelectedAppInfo == null)
@@ -499,10 +413,6 @@ namespace TuShan.CleanDeath.ViewModels
             CleanAppInfos.Add(cleanAppModel);
         }
 
-        /// <summary>
-        /// 手动添加要监控的软件
-        /// </summary>
-        /// <param name="cleanAppModel"></param>
         public void AddAppInfoEvent(CleanAppModel cleanAppModel)
         {
             if (cleanAppModel == null)
@@ -522,9 +432,6 @@ namespace TuShan.CleanDeath.ViewModels
             CleanAppInfos.Add(cleanAppModel);
         }
 
-        /// <summary>
-        /// 手动添加软件信息
-        /// </summary>
         public void HandAddAppInfoEvent()
         {
             AppInfoViewModel appInfoViewModel = new AppInfoViewModel();
@@ -533,9 +440,6 @@ namespace TuShan.CleanDeath.ViewModels
             _iWindowManager.ShowDialogAsync(appInfoViewModel);
         }
 
-        /// <summary>
-        /// 删除选中的守护软件项
-        /// </summary>
         public void DeleteSelectedApp()
         {
             if (CleanAppInfos == null)
@@ -550,9 +454,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         }
 
-        /// <summary>
-        /// 保存守护app信息到配置
-        /// </summary>
         public void SaveCleanAppsEvent()
         {
             if (_cleanDeathSetting == null)
@@ -580,9 +481,6 @@ namespace TuShan.CleanDeath.ViewModels
             SettingUtility.SaveTSetting(_cleanDeathSetting);
         }
 
-        /// <summary>
-        /// 加载需要守护的app信息
-        /// </summary>
         public void CleanAppsLoaded()
         {
             if (_cleanDeathSetting == null)
@@ -619,7 +517,6 @@ namespace TuShan.CleanDeath.ViewModels
                     InfoMessageShow("请拖放.lnk或.exe文件。");
                 }
                 bool isAllPathError = true;
-                // 检查是否是.lnk文件
                 foreach (string exePath in files)
                 {
 
@@ -636,10 +533,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 通过选择的文件来设置app对象信息
-        /// </summary>
-        /// <param name="selectedFilePath"></param>
         private void SetAppInfoByPath(string selectedFilePath)
         {
             if (!string.IsNullOrWhiteSpace(selectedFilePath))
@@ -694,17 +587,9 @@ namespace TuShan.CleanDeath.ViewModels
             }
             if (e.AddedItems != null && e.AddedItems.Count > 0 && e.AddedItems[0].GetType().Name == "TabItem")
             {
-                //System.Windows.Controls.TabItem tabAddItem = e.AddedItems[0] as System.Windows.Controls.TabItem;
-                //if (tabAddItem.Header.ToString() == "软件设置")
-                //{
-                //    InfoMessageShow("仅支持64位系统");
-                //}
             }
         }
 
-        /// <summary>
-        /// 开始守护底裤
-        /// </summary>
         public async void StartGuard()
         {
             if (MessageBoxResult.No == MyMessageBox.Show($"已保存所有设置？\r\n*将每隔{MaxTimeOutDay}天进行用户活跃检查", CleanDeath.Views.ButtonType.YesNo, MessageType.Question))
@@ -717,12 +602,10 @@ namespace TuShan.CleanDeath.ViewModels
                 ServiceUtility.StopService();
                 Thread.Sleep(1000);
                 RestratHelp.RunRestartTools(true);
-                //更新检测时间
                 _cleanDeathSetting.MaxTimeOutDay = MaxTimeOutDay;
                 _cleanDeathSetting.NeedCleanTime = DateTime.Now.AddDays(MaxTimeOutDay);
                 SettingUtility.SaveTSetting(_cleanDeathSetting);
                 ServiceUtility.StartService();
-                //初始化服务客户端
                 ServiceClientUtility.InitClient();
                 Thread.Sleep(1000);
                 this.TryCloseAsync();
@@ -743,9 +626,6 @@ namespace TuShan.CleanDeath.ViewModels
 
         private int _dataWriteTime = 1;
 
-        /// <summary>
-        /// 脏数据覆盖次数
-        /// </summary>
         public int DataWriteTime
         {
             get { return _dataWriteTime; }
@@ -763,9 +643,6 @@ namespace TuShan.CleanDeath.ViewModels
             SettingUtility.SaveTSetting(_cleanDeathSetting);
         }
 
-        /// <summary>
-        /// 停止守护
-        /// </summary>
         public async void StopCleanDeath()
         {
             if (!ServiceUtility.IsServiceRun())
@@ -776,8 +653,6 @@ namespace TuShan.CleanDeath.ViewModels
             BusyBorderShow = Visibility.Visible;
             await Task.Run(() =>
             {
-                //1.停止服务
-                //2.删除开机启动
                 ServiceUtility.StopService();
                 Thread.Sleep(20);
                 RestratHelp.RunRestartTools(false);
@@ -786,9 +661,6 @@ namespace TuShan.CleanDeath.ViewModels
             InfoMessageShow("已停止守护");
         }
 
-        /// <summary>
-        /// 开始立刻清理
-        /// </summary>
         public async void StartGuardNow()
         {
             if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
@@ -812,14 +684,8 @@ namespace TuShan.CleanDeath.ViewModels
 
         #region 立即删除逻辑
 
-        /// <summary>
-        /// 需要删除的程序文件多线程所以用静态
-        /// </summary>
         public static List<string> _NeedDeleteAppFolder = new List<string>();
 
-        /// <summary>
-        /// 开始清空所有
-        /// </summary>
         private void StartClean()
         {
             _NeedDeleteAppFolder = new List<string>();
@@ -850,7 +716,6 @@ namespace TuShan.CleanDeath.ViewModels
         {
             try
             {
-                //开始关闭进程
                 foreach (AppSetttingStruct structCleanFolder in _cleanDeathSetting.CleanApps)
                 {
                     if (!structCleanFolder.IsEnable)
@@ -860,18 +725,14 @@ namespace TuShan.CleanDeath.ViewModels
                     CloseProcessByName(structCleanFolder.AppExeName);
                 }
                 Thread.Sleep(100);
-                //删除注册表
                 DeleteAppRegistryByName();
-                //开始获取app的进程和缓存文件地址
                 GetAppCacheFolderPath();
 
-                //删除桌面快捷方式
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 TraverseDirectory(desktopPath, _cleanDeathSetting.CleanApps);
                 string allDesktopPath = "C:\\Users\\Public\\Desktop";
                 TraverseDirectory(allDesktopPath, _cleanDeathSetting.CleanApps);
                 Thread.Sleep(100);
-                //删除任务栏快捷方式
                 DeleteLnkOnTask();
                 Thread.Sleep(100);
                 foreach (string path in _NeedDeleteAppFolder)
@@ -885,10 +746,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 删除任务栏上的快捷方式
-        /// </summary>
-        /// <param name="CleanApps"></param>
         private void DeleteLnkOnTask()
         {
             string exePath = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.DeleteTaskbarIcon.exe";
@@ -899,18 +756,12 @@ namespace TuShan.CleanDeath.ViewModels
             myprocess.Start();
             myprocess.WaitForExit();
 
-            //退出码 1为正常，0为异常
             if (myprocess.ExitCode != 1)
             {
                 TLog.Error("删除任务栏快捷方式错误");
             }
         }
 
-        /// <summary>
-        /// 遍历文件夹
-        /// </summary>
-        /// <param name="folderPath"></param>
-        /// <param name="cleanDeathSetting1"></param>
         void TraverseDirectory(string folderPath, List<AppSetttingStruct> cleanDeathSetting)
         {
             try
@@ -942,11 +793,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 获取快捷方式的目标地址
-        /// </summary>
-        /// <param name="shortcutPath"></param>
-        /// <returns></returns>
         string GetShortcutTarget(string shortcutPath)
         {
             try
@@ -959,23 +805,15 @@ namespace TuShan.CleanDeath.ViewModels
             }
             catch (Exception ex)
             {
-                // 处理异常，如快捷方式文件不存在或无法读取
                 Console.WriteLine("发生异常：" + ex.Message);
                 return null;
             }
         }
 
-        /// <summary>
-        /// 删除app缓存
-        /// </summary>
-        /// C:\Users\Administrator\AppData
-        /// 默认应该有三个文件夹可以缓存文件 \Local \Roaming \LocalLow
         private void GetAppCacheFolderPath()
         {
             _NeedDeleteAppFolder = new List<string>();
-            //12s 8s 多线程4s
             Stopwatch stopwatch = Stopwatch.StartNew();
-            //三个缓存文件夹路径
             string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string parentDirectory = Directory.GetParent(localFolderPath).FullName;
             string roamingFolderPath = Path.Combine(parentDirectory, "Roaming");
@@ -991,7 +829,6 @@ namespace TuShan.CleanDeath.ViewModels
                 {
                     continue;
                 }
-                //文件路径包含.
                 if (structCleanFolder.AppFilePath.Contains("."))
                 {
                     structCleanFolder.AppFilePath = Directory.GetParent(structCleanFolder.AppFilePath).FullName;
@@ -1065,7 +902,6 @@ namespace TuShan.CleanDeath.ViewModels
                 foreach (Process process in processes)
                 {
                     process.Kill();
-                    TLog.Info($"关闭{peocessName}进程");
                 }
             }
             else
@@ -1080,18 +916,12 @@ namespace TuShan.CleanDeath.ViewModels
                         foreach (Process process in processRun)
                         {
                             process.Kill();
-                            TLog.Info($"关闭{peocessName}进程");
                         }
                     }
                 }
-                TLog.Info($"{peocessName}未运行");
             }
         }
 
-        /// <summary>
-        /// 删除目录,且数据不可恢复
-        /// </summary>
-        /// <param name="dir">要删除的目录</param>
         public void DeleteFolder(string dir, List<string> notDeleteFileList = null, List<string> notDeleteFolderList = null)
         {
             if (System.IO.Directory.Exists(dir))
@@ -1104,7 +934,6 @@ namespace TuShan.CleanDeath.ViewModels
                     {
                         continue;
                     }
-                    // 使用随机数据覆盖文件内容
                     OverwriteFileWithRandomData(item.FullName);
                     File.Delete(item.FullName);
                 }
@@ -1123,10 +952,6 @@ namespace TuShan.CleanDeath.ViewModels
             }
         }
 
-        /// <summary>
-        /// 覆盖数据
-        /// </summary>
-        /// <param name="filePath"></param>
         private void OverwriteFileWithRandomData(string filePath)
         {
             int writeTime = _cleanDeathSetting == null ? 3 : _cleanDeathSetting.WriteTime;
@@ -1134,33 +959,25 @@ namespace TuShan.CleanDeath.ViewModels
             {
                 using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
                 {
-                    // 创建随机数据
                     byte[] randomData = new byte[fs.Length];
                     new RNGCryptoServiceProvider().GetBytes(randomData);
-                    // 覆盖文件内容
                     fs.Seek(0, SeekOrigin.Begin);
                     fs.Write(randomData, 0, randomData.Length);
                 }
             }
         }
 
-        /// <summary>
-        /// 删除注册表中的所有数据
-        /// </summary>
         private void DeleteAppRegistryByName()
         {
             if (_cleanDeathSetting == null)
             {
                 return;
             }
-            //遍历32位应用程序的注册表路径
             string keyPath32Bit = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
             DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry32, keyPath32Bit);
 
-            //遍历64位应用程序的注册表路径
             DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry64, keyPath32Bit);
 
-            //可能一些特殊应用存在如下位置
             string keyPath64Bit = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
             DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry32, keyPath64Bit);
             DeleteAppsFromRegistry(_cleanDeathSetting, RegistryView.Registry64, keyPath64Bit);
@@ -1191,21 +1008,18 @@ namespace TuShan.CleanDeath.ViewModels
                     {
                         try
                         {
-                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true); // 打开注册表项，第二个参数为 true 表示可写入
+                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true);    
 
                             if (deletekey != null)
                             {
                                 Registry.LocalMachine.DeleteSubKeyTree(appKey);
-                                TLog.Info("注册表项删除成功:" + appKey);
                             }
                             else
                             {
-                                TLog.Info("注册表项未找到，无需删除。" + appKey);
                             }
                         }
                         catch (Exception ex)
                         {
-                            TLog.Info("删除注册表项时发生错误：" + appKey + ex.Message);
                         }
                     }
                 }
@@ -1231,21 +1045,18 @@ namespace TuShan.CleanDeath.ViewModels
                     {
                         try
                         {
-                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true); // 打开注册表项，第二个参数为 true 表示可写入
+                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true);    
 
                             if (deletekey != null)
                             {
                                 Registry.LocalMachine.DeleteSubKeyTree(appKey);
-                                TLog.Info("注册表项删除成功:" + appKey);
                             }
                             else
                             {
-                                TLog.Info("注册表项未找到，无需删除。" + appKey);
                             }
                         }
                         catch (Exception ex)
                         {
-                            TLog.Info("删除注册表项时发生错误：" + appKey + ex.Message);
                         }
                     }
                 }

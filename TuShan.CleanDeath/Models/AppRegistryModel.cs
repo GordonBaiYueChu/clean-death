@@ -10,9 +10,6 @@ namespace TuShan.CleanDeath.Models
     {
         private string appDisplayName;
 
-        /// <summary>
-        /// 应用程序名称
-        /// </summary>
         public string AppDisplayName
         {
             get { return appDisplayName; }
@@ -25,9 +22,6 @@ namespace TuShan.CleanDeath.Models
 
         private string installLocation;
 
-        /// <summary>
-        /// 安装目录 例如：C:\Program Files\Google\Chrome\Application
-        /// </summary>
         public string InstallLocation
         {
             get { return installLocation; }
@@ -40,9 +34,6 @@ namespace TuShan.CleanDeath.Models
 
         private string appExeName;
 
-        /// <summary>
-        /// 应用程序员exe名称chrome.exe
-        /// </summary>
         public string AppExeName
         {
             get { return appExeName; }
@@ -55,9 +46,6 @@ namespace TuShan.CleanDeath.Models
 
         private string appExePath;
 
-        /// <summary>
-        /// 应用程序员exe路径，先关进程再卸载 C:\Program Files\Google\Chrome\Application\chrome.exe,0
-        /// </summary>
         public string AppExePath
         {
             get { return appExePath; }
@@ -71,9 +59,6 @@ namespace TuShan.CleanDeath.Models
 
         private string unInstallString;
 
-        /// <summary>
-        /// 卸载命令
-        /// </summary>
         public string UnInstallString
         {
             get { return unInstallString; }

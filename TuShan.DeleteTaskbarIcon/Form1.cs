@@ -22,7 +22,6 @@ namespace TuShan.DeleteTaskbarIcon
         public Form1()
         {
             InitializeComponent();
-            //配置日志文件信息
             TLog.Configure("../Conf/Factory/log4net.config");
             this.Visible = false;
         }
@@ -30,17 +29,11 @@ namespace TuShan.DeleteTaskbarIcon
         private void Form1_Load(object sender, EventArgs e)
         {
             CleanDeathSetting cleanDeathSetting = SettingUtility.GetTSetting<CleanDeathSetting>();
-            //删除任务栏快捷方式
             DeleteLnkOnTask(cleanDeathSetting.CleanApps);
-            TLog.Info("关闭");
             this.Close();
         }
 
 
-        /// <summary>
-        /// 删除任务栏上的快捷方式
-        /// </summary>
-        /// <param name="CleanApps"></param>
         private void DeleteLnkOnTask(List<AppSetttingStruct> CleanApps)
         {
             string localFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -63,13 +56,11 @@ namespace TuShan.DeleteTaskbarIcon
                             FolderItem app = folder.ParseName(Path.GetFileName(file));
                             foreach (FolderItemVerb Fib in app.Verbs())
                             {
-                                //从任务栏取消固定(&K)
                                 if (Fib.Name.Contains("从任务"))
                                 {
                                     Fib.DoIt();
                                 }
                             }
-                           // File.Delete(file);
                         }
                     }
                 }
@@ -80,11 +71,6 @@ namespace TuShan.DeleteTaskbarIcon
             }
         }
 
-        /// <summary>
-        /// 获取lnk的名称
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
         private string GetPathLinkName(string path)
         {
             string[] strings = path.Split('\\');
@@ -92,11 +78,6 @@ namespace TuShan.DeleteTaskbarIcon
             return name;
         }
 
-        /// <summary>
-        /// 获取快捷方式的目标地址
-        /// </summary>
-        /// <param name="shortcutPath"></param>
-        /// <returns></returns>
         string GetShortcutTarget(string shortcutPath)
         {
             try
@@ -109,7 +90,6 @@ namespace TuShan.DeleteTaskbarIcon
             }
             catch (Exception ex)
             {
-                // 处理异常，如快捷方式文件不存在或无法读取
                 Console.WriteLine("发生异常：" + ex.Message);
                 return null;
             }

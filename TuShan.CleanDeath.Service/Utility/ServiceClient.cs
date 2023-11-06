@@ -20,15 +20,12 @@ using TuShan.CleanDeath.Service.Struct;
 
 namespace TuShan.CleanDeath.Service.Utility
 {
-    /// <summary>
-    /// 客户端
-    /// </summary>
     public class ServiceClient
     {
-        private string _processPath;  //进程ID,身份唯一标识
-        private string _ip; //服务端ip
-        private int _port;  //服务端端口
-        private int _publishPort;   //推送接收方式服务端端口
+        private string _processPath;  
+        private string _ip; 
+        private int _port;  
+        private int _publishPort;   
         private TimeSpan _ts = new TimeSpan(0, 0, 5);
 
         public ServiceClient(string processPath, string ip, int port, int publishPort)
@@ -42,14 +39,10 @@ namespace TuShan.CleanDeath.Service.Utility
             ConnectServer();
         }
 
-        /// <summary>
-        /// 监听server发送的消息
-        /// </summary>
         private void Begin()
         {
             Task.Run(() =>
             {
-                //请求回复模型
                 using (SubscriberSocket subSocket = new SubscriberSocket())
                 {
                     subSocket.Options.ReceiveHighWatermark = 1000;
@@ -85,19 +78,11 @@ namespace TuShan.CleanDeath.Service.Utility
             });
         }
 
-        /// <summary>
-        /// 处理服务端发送的消息
-        /// </summary>
-        /// <param name="publicSubStruct"></param>
         private void HandlePublicSub(PublicSubStruct publicSubStruct)
         {
 
         }
 
-        /// <summary>
-        /// 连接到Server,本进程ID,作为身份唯一标识传递
-        /// </summary>
-        /// <returns></returns>
         public bool ConnectServer()
         {
             string path = Environment.GetEnvironmentVariable("USERPROFILE", EnvironmentVariableTarget.Process);
@@ -121,11 +106,6 @@ namespace TuShan.CleanDeath.Service.Utility
         }
 
 
-        /// <summary>
-        /// Request请求
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         private ResponseStruct Request(RequestStruct request)
         {
             using (NetMQSocket clientSocket = new RequestSocket())
@@ -152,9 +132,6 @@ namespace TuShan.CleanDeath.Service.Utility
     {
         public static ServiceClient Client;
 
-        /// <summary>
-        /// 初始化服务客户端
-        /// </summary>
         public static void InitClient()
         {
             string serverIp = "127.0.0.1";
@@ -185,7 +162,6 @@ namespace TuShan.CleanDeath.Service.Utility
                 proc.Start();
                 proc.WaitForExit();
                 Thread.Sleep(2000);
-                //等待服务运行
                 while (ServiceAPI.GetServiceStatus(_serviceName) != ServiceControllerStatus.Running)
                 {
 
@@ -211,10 +187,6 @@ namespace TuShan.CleanDeath.Service.Utility
             }
         }
 
-        /// <summary>
-        /// 检测端口是否占用并返回可用端口
-        /// </summary>
-        /// <returns></returns>
         public static int GetFreePort(int port)
         {
             var random = new Random();
@@ -228,11 +200,6 @@ namespace TuShan.CleanDeath.Service.Utility
 
     public class ServiceAPI
     {
-        /// <summary>
-        /// 检查服务存在的存在性
-        /// </summary>
-        /// <param name=" NameService ">服务名</param>
-        /// <returns>存在返回 true,否则返回 false;</returns>
         public static bool isServiceIsExisted(string NameService)
         {
             ServiceController[] services = ServiceController.GetServices();
@@ -245,11 +212,6 @@ namespace TuShan.CleanDeath.Service.Utility
             }
             return false;
         }
-        /// <summary>
-        /// 安装Windows服务
-        /// </summary>
-        /// <param name="stateSaver">集合</param>
-        /// <param name="filepath">程序文件路径</param>
         public static void InstallmyService(IDictionary stateSaver, string filepath)
         {
             AssemblyInstaller AssemblyInstaller1 = new AssemblyInstaller();
@@ -259,10 +221,6 @@ namespace TuShan.CleanDeath.Service.Utility
             AssemblyInstaller1.Commit(stateSaver);
             AssemblyInstaller1.Dispose();
         }
-        /// <summary>
-        /// 卸载Windows服务
-        /// </summary>
-        /// <param name="filepath">程序文件路径</param>
         public static void UnInstallmyService(string filepath)
         {
             AssemblyInstaller AssemblyInstaller1 = new AssemblyInstaller();
@@ -272,11 +230,6 @@ namespace TuShan.CleanDeath.Service.Utility
             AssemblyInstaller1.Dispose();
         }
 
-        /// <summary>
-        /// 启动服务
-        /// </summary>
-        /// <param name=" NameService ">服务名</param>
-        /// <returns>存在返回 true,否则返回 false;</returns>
         public static bool RunService(string NameService)
         {
             bool bo = true;
@@ -296,11 +249,6 @@ namespace TuShan.CleanDeath.Service.Utility
             return bo;
         }
 
-        /// <summary>
-        /// 停止服务
-        /// </summary>
-        /// <param name=" NameService ">服务名</param>
-        /// <returns>存在返回 true,否则返回 false;</returns>
         public static bool StopService(string NameService)
         {
             bool bo = true;
@@ -320,11 +268,6 @@ namespace TuShan.CleanDeath.Service.Utility
             return bo;
         }
 
-        /// <summary>
-        /// 获取服务状态
-        /// </summary>
-        /// <param name=" NameService ">服务名</param>
-        /// <returns>返回服务状态</returns>
         public static ServiceControllerStatus GetServiceStatus(string NameService)
         {
             try
@@ -345,11 +288,6 @@ namespace TuShan.CleanDeath.Service.Utility
             }
         }
 
-        /// <summary>
-        /// 获取服务安装路径
-        /// </summary>
-        /// <param name="ServiceName"></param>
-        /// <returns></returns>
         public static string GetWindowsServiceInstallPath(string ServiceName)
         {
             string path = "";
@@ -358,7 +296,7 @@ namespace TuShan.CleanDeath.Service.Utility
                 string key = @"SYSTEM\CurrentControlSet\Services\" + ServiceName;
                 path = Registry.LocalMachine.OpenSubKey(key).GetValue("ImagePath").ToString();
 
-                path = path.Replace("\"", string.Empty);//替换掉双引号  
+                path = path.Replace("\"", string.Empty);  
 
                 FileInfo fi = new FileInfo(path);
                 path = fi.Directory.ToString();
@@ -370,11 +308,6 @@ namespace TuShan.CleanDeath.Service.Utility
             return path;
         }
 
-        /// <summary>
-        /// 获取指定服务的版本号
-        /// </summary>
-        /// <param name="serviceName">服务名称</param>
-        /// <returns></returns>
         public static string GetServiceVersion(string serviceName)
         {
             if (string.IsNullOrEmpty(serviceName))

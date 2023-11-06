@@ -10,14 +10,8 @@ using TuShan.CleanDeath.Service.Struct;
 
 namespace TuShan.CleanDeath.Service.Utility
 {
-    /// <summary>
-    /// 进程管理
-    /// </summary>
     public class ProcessUtility
     {
-        /// <summary>
-        /// 打开主进程
-        /// </summary>
         public static int OpenMainProcess(OpenProcessStruct model = null)
         {
             string exePath = $"{AppDomain.CurrentDomain.BaseDirectory}TuShan.BountyHunterDream.Viewer.BHD.exe";

@@ -19,20 +19,10 @@ namespace TuShan.BountyHunterDream.Setting
         public static string factoryPath = "../Conf/Factory/";
         private const string FacExName = ".bak";
 
-        /// <summary>
-        /// 不比较的属性名称
-        /// </summary>
         private static List<string> _notCompareTypeName = new List<string>() { "Guid", "Version" };
 
         #region save
 
-        /// <summary>
-        /// 保存配置文件
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="t"></param>
-        /// 不需要替换对象，直接保存文件即可
-        /// 1.当导入时，需要保存导入的值到文件中，并拷贝要导入的值放进内存中。
         public static void SaveTSetting<T>(T t, bool isUpdateCache = false) where T : BaseSetting<T>, new()
         {
             bool isExist = true;
@@ -53,13 +43,6 @@ namespace TuShan.BountyHunterDream.Setting
         }
 
 
-        /// <summary>
-        /// 保存配置文件带路径
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="t"></param>
-        /// 不需要替换对象，直接保存文件即可
-        /// 1.当导入时，需要保存导入的值到文件中，并拷贝要导入的值放进内存中。
         public static void SaveTSetting<T>(T t, string path, bool isUpdateCache = false) where T : BaseSetting<T>, new()
         {
             bool isExist = true;
@@ -78,15 +61,6 @@ namespace TuShan.BountyHunterDream.Setting
         }
 
 
-        /// <summary>
-        /// 保存配置对象，对象为空则保存原来的对象。
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="toSave"></param>
-        /// <param name="cache"></param>
-        /// <param name="path"></param>
-        /// <param name="lastpath"></param>
-        /// <param name="checkNull"></param>
         private static void SaveCache<T>(T toSave, ref T cache, string path, string lastpath, Func<T, bool> checkNull = null) where T : BaseSetting<T>, new()
         {
             if (checkNull != null && checkNull(toSave) || toSave == null)
@@ -168,19 +142,11 @@ namespace TuShan.BountyHunterDream.Setting
             return (T)_cacheSetting[fileName];
         }
 
-        /// <summary>
-        /// 更新配置文件对象
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="t"></param>
-        /// <param name="key"></param>
-        /// 直接替换值会发生内存泄漏
         private static void AddUpdateCache<T>(T t, string key) where T : BaseSetting<T>
         {
             if (_cacheSetting.ContainsKey(key))
             {
                 TLog.Info($"保存配置文件{typeof(T).Name}");
-                //相同对象不进行保存处理
                 if (_cacheSetting[key] == t)
                 {
                     return;
@@ -193,14 +159,6 @@ namespace TuShan.BountyHunterDream.Setting
             }
         }
 
-        /// <summary>
-        /// 修改类的属性值(不考虑顺序)
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="soureData">元数据</param>
-        /// <param name="needCopyData">待复制数据</param>
-        /// <param name="notCompareTypeName">不比较的属性名称</param>
-        /// <returns></returns>
         public static void SetPropertysEquale<T>(T soureData, T needCopyData, List<string> notCompareTypeName = null)
         {
             if (soureData == null || needCopyData == null)
@@ -230,11 +188,8 @@ namespace TuShan.BountyHunterDream.Setting
                 PropertyInfo[] sInfos = sInfo.GetProperties();
                 foreach (PropertyInfo sourePro in sInfos)
                 {
-                    //属性名
                     string Pname = sourePro.Name;
-                    //属性类型
                     string pTypeName = sourePro.PropertyType.Name;
-                    //值
                     object sourevalue = sourePro.GetValue(soureData, null);
                     object needCopyValue = sourePro.GetValue(needCopyData, null);
                     if (sourePro.PropertyType.IsValueType || pTypeName.Equals("String") || pTypeName.Equals("SolidColorBrush"))
@@ -248,7 +203,6 @@ namespace TuShan.BountyHunterDream.Setting
                     }
                     else if (sourevalue is System.Collections.IList sourelist && needCopyValue is System.Collections.IList needCopylist)
                     {
-                        //为数组结构，数量未知，对象赋值
                         if (sourelist.Count > 0 && (sourelist[0].GetType().IsValueType || sourelist[0].GetType().Name.StartsWith("String")))
                         {
                             sourePro.SetValue(soureData, Convert.ChangeType(needCopyValue, sourePro.PropertyType), null);
@@ -282,8 +236,6 @@ namespace TuShan.BountyHunterDream.Setting
                 {
                     if (Application.Current.MainWindow != null)
                     {
-                        //var MessageBoxResult = TMessageBox.Show(jsonName + " " + LanguageHelper.LoadString(message), ButtonType.OK, MessageType.Warn, true, 3);
-                        //isOk = MessageBoxResult == MessageBoxResult.OK || MessageBoxResult == MessageBoxResult.Yes;
                     }
                     else
                     {

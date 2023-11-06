@@ -9,11 +9,6 @@ namespace TuShan.CleanDeath.Helps
 {
     public class PathHelp
     {
-        /// <summary>
-        /// 获取lnk文件的目标文件地址
-        /// </summary>
-        /// <param name="shortcutPath"></param>
-        /// <returns></returns>
         public static string GetShortcutTarget(string shortcutPath)
         {
             try
@@ -26,7 +21,6 @@ namespace TuShan.CleanDeath.Helps
             }
             catch (Exception ex)
             {
-                // 处理异常，如快捷方式文件不存在或无法读取
                 Console.WriteLine("发生异常：" + ex.Message);
                 return null;
             }
