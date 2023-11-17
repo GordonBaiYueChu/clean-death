@@ -24,6 +24,33 @@ namespace TuShan.BountyHunterDream.Setting
         /// </summary>
         private static List<string> _notCompareTypeName = new List<string>() { "Guid", "Version" };
 
+
+        public static void CheckFilesExist()
+        {
+            CheckFileExist("CleanDeathSetting");
+        }
+
+        public static void CheckFileExist(string filename)
+        {
+            string filePath = string.Format("../Conf/{0}.json", filename);
+            string lastFile = string.Format("../Conf/{0}.bak", filename);
+            string factoryFile = string.Format("../Conf/Factory/{0}.bak", filename);
+            if (!File.Exists(filePath))
+            {
+                if (!File.Exists(lastFile))
+                {
+                    if (File.Exists(factoryFile))
+                    {
+                        File.Copy(factoryFile, filePath);
+                    }
+                }
+                else
+                {
+                    File.Copy(lastFile, filePath);
+                }
+            }
+        }
+
         #region save
 
         /// <summary>

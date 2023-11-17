@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterScreen"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         ResizeMode="NoResize"
-        Height="450"
+        Height="600"
         Width="800"
         cal:Message.Attach="[Closed]=[ViewModelClosed];[Loaded]=[ViewModelLoaded]">
     <Window.Resources>
@@ -161,7 +161,7 @@
                                           VerticalAlignment="Center"
                                           HorizontalContentAlignment="Center"
                                           IsEditable="True"
-                                          hc:InfoElement.Placeholder="请输入或选则软件名称"
+                                          hc:InfoElement.Placeholder="请输入或选择软件名称"
                                           hc:InfoElement.Title="应用名称"
                                           Style="{StaticResource ComboBoxExtend}"
                                           hc:InfoElement.Necessary="True"
@@ -323,6 +323,9 @@
                                 <TextBlock>注意事项：</TextBlock>
                                 <TextBlock> 1.删除的文件恢复较为困难，请合理使用。</TextBlock>
                                 <TextBlock> 2.盗版可能会导致电脑文件异常删除，请注意识别。</TextBlock>
+                                <TextBlock>商家信息：</TextBlock>
+                                <TextBlock> 1.抖音店铺名称：涂山科技软件研发</TextBlock>
+                                <TextBlock> 2.商家网站：www.tushankeji.work</TextBlock>
                             </StackPanel>
                         </Grid>
                     </TabItem>
@@ -340,6 +343,7 @@
 
                 <hc:NumericUpDown Width="150"
                                   Height="30"
+                                  Margin="10"
                                   Value="{Binding MaxTimeOutDay,Mode=TwoWay}"
                                   Minimum="1"
                                   ToolTip="1天为24小时"
@@ -351,7 +355,7 @@
                         cal:Message.Attach="[Click]=[StartGuard()]"
                         Content="开始守护你的底裤"
                         hc:FloatingBlock.Content="要留清白在人间"
-                        Margin="25,5"
+                        Margin="25,5,0,10"
                         Width="Auto" />
             </Grid>
         </Border>
@@ -374,7 +378,7 @@
                         Margin="0,10,10,10"
                         SizeChanged="StackPanel_SizeChanged" />
         </ScrollViewer>
-        <!--<Border Grid.RowSpan="3"
+        <Border Grid.RowSpan="3"
                 Visibility="{Binding BusyBorderShow}"
                 Background="{StaticResource MainContentForegroundBrush}"
                 Opacity="0.9">
@@ -392,6 +396,6 @@
                                 Foreground="BlueViolet"
                                 Style="{StaticResource LoadingLineLarge}" />
             </StackPanel>
-        </Border>-->
+        </Border>
     </Grid>
 </Window>

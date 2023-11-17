@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Caliburn.Micro;
 using HandyControl.Controls;
+using HandyControl.Tools.Extension;
 using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
 using TuShan.BountyHunterDream.Logger;
@@ -302,37 +303,6 @@ namespace TuShan.CleanDeath.ViewModels
         }
 
         /// <summary>
-        /// 获取一些不在注册表中的app，完全写死,从配置中读取，并暴露给用户，用户可自定义
-        /// </summary>
-        private void GetSomeAppNotInRegistry()
-        {
-            SystemSetting systemSetting = SettingUtility.GetTSetting<SystemSetting>();
-            if (systemSetting == null)
-            {
-                return;
-            }
-            if (AllAppInfos == null)
-            {
-                AllAppInfos = new ObservableCollection<AppRegistryModel>();
-            }
-            foreach (AppSetttingStruct appSetttingStruct in systemSetting.WindowApps)
-            {
-                if (AllAppInfos.Any(a => a.AppDisplayName == appSetttingStruct.AppDisplayName))
-                {
-                    continue;
-                }
-                if (Directory.Exists(appSetttingStruct.AppFilePath))
-                {
-                    AppRegistryModel appRegistryModel = new AppRegistryModel();
-                    appRegistryModel.AppExePath = appSetttingStruct.AppFilePath;
-                    appRegistryModel.AppExeName = appSetttingStruct.AppExeName;
-                    appRegistryModel.AppDisplayName = appSetttingStruct.AppDisplayName;
-                    AllAppInfos.Add(appRegistryModel);
-                }
-            }
-        }
-
-        /// <summary>
         /// 通过注册表获取所有已安装应用程序数据
         /// </summary>
         private void GetAllAppNamesByRegistry()
@@ -356,117 +326,101 @@ namespace TuShan.CleanDeath.ViewModels
 
         private void GetInstalledAppsFromRegistry(List<AppRegistryModel> installedApps, RegistryView registryView, string keyPath)
         {
-            using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
-            using (RegistryKey subKey = key.OpenSubKey(keyPath))
+            try
             {
-                if (subKey != null)
+                using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+                using (RegistryKey subKey = key.OpenSubKey(keyPath))
                 {
-                    foreach (string subKeyName in subKey.GetSubKeyNames())
+                    if (subKey != null)
                     {
-                        using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
+                        foreach (string subKeyName in subKey.GetSubKeyNames())
                         {
-                            string displayName = appKey.GetValue("DisplayName") as string;
-
-                            //if (displayName != null && displayName.Contains("搜狗"))
-                            //{
-
-                            //}
-                            //if (subKeyName != null && subKeyName.Contains("Moz"))
-                            //{ 
-
-                            //}
-
-                            //foreach (string valueName in appKey.GetValueNames())
-                            //{
-                            //    string valueData = appKey.GetValue(valueName) as string;
-                            //    Console.WriteLine("启动项名称：" + valueName);
-                            //    Console.WriteLine("应用程序路径：" + valueData);
-                            //}
-
-                            // 排除系统应用 systemComponent == 1
-                            int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
-                            if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
+                            using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                             {
-                                continue;
+                                string displayName = appKey.GetValue("DisplayName") as string;
+
+                                int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
+                                if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
+                                {
+                                    continue;
+                                }
+                                if (!installedApps.Any(i => i.AppDisplayName.Equals(displayName)))
+                                {
+                                    AppRegistryModel appRegistryModel = new AppRegistryModel();
+                                    appRegistryModel.AppDisplayName = displayName;
+                                    appRegistryModel.InstallLocation = appKey.GetValue("InstallLocation") as string;
+                                    appRegistryModel.AppExePath = appKey.GetValue("DisplayIcon") as string;
+                                    appRegistryModel.UnInstallString = appKey.GetValue("UninstallString") as string;
+                                    if (!string.IsNullOrWhiteSpace(appRegistryModel.AppExePath) && appRegistryModel.AppExePath.Contains("\\"))
+                                    {
+                                        string exePath = appRegistryModel.AppExePath;
+                                        if (appRegistryModel.AppExePath.EndsWith(".exe"))
+                                        {
+                                            exePath = exePath.Split('\\').Last();
+                                        }
+                                        else
+                                        {
+                                            string[] exePaths = exePath.Split('\\');
+                                            exePath = exePaths[exePaths.Length - 2];
+                                        }
+                                        appRegistryModel.AppExeName = exePath;
+                                    }
+                                    if (string.IsNullOrWhiteSpace(appRegistryModel.InstallLocation))
+                                    {
+                                        appRegistryModel.InstallLocation = Path.GetDirectoryName(appRegistryModel.AppExePath);
+                                    }
+                                    installedApps.Add(appRegistryModel);
+                                }
                             }
-                            if (!installedApps.Any(i => i.AppDisplayName.Equals(displayName)))
+                        }
+                    }
+                }
+                using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, registryView))
+                using (RegistryKey subKey = key.OpenSubKey(keyPath))
+                {
+                    if (subKey != null)
+                    {
+                        foreach (string subKeyName in subKey.GetSubKeyNames())
+                        {
+                            using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                             {
-                                AppRegistryModel appRegistryModel = new AppRegistryModel();
-                                appRegistryModel.AppDisplayName = displayName;
-                                appRegistryModel.InstallLocation = appKey.GetValue("InstallLocation") as string;
-                                appRegistryModel.AppExePath = appKey.GetValue("DisplayIcon") as string;
-                                appRegistryModel.UnInstallString = appKey.GetValue("UninstallString") as string;
-                                if (!string.IsNullOrWhiteSpace(appRegistryModel.AppExePath) && appRegistryModel.AppExePath.Contains("\\"))
+                                string displayName = appKey.GetValue("DisplayName") as string;
+                                int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
+                                if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
                                 {
-                                    string exePath = appRegistryModel.AppExePath;
-                                    if (appRegistryModel.AppExePath.EndsWith(".exe"))
-                                    {
-                                        exePath = exePath.Split('\\').Last();
-                                    }
-                                    else
-                                    {
-                                        string[] exePaths = exePath.Split('\\');
-                                        exePath = exePaths[exePaths.Length - 2];
-                                    }
-                                    appRegistryModel.AppExeName = exePath;
+                                    continue;
                                 }
-                                if (string.IsNullOrWhiteSpace(appRegistryModel.InstallLocation))
+                                if (!installedApps.Any(i => i.AppDisplayName.Equals(displayName)))
                                 {
-                                    appRegistryModel.InstallLocation = Path.GetDirectoryName(appRegistryModel.AppExePath);
+                                    AppRegistryModel appRegistryModel = new AppRegistryModel();
+                                    appRegistryModel.AppDisplayName = displayName;
+                                    appRegistryModel.InstallLocation = appKey.GetValue("InstallLocation") as string;
+                                    appRegistryModel.AppExePath = appKey.GetValue("DisplayIcon") as string;
+                                    appRegistryModel.UnInstallString = appKey.GetValue("UninstallString") as string;
+                                    if (!string.IsNullOrWhiteSpace(appRegistryModel.AppExePath))
+                                    {
+                                        string exePath = appRegistryModel.AppExePath;
+                                        if (exePath.Contains("\\"))
+                                        {
+                                            exePath = exePath.Split('\\').Last();
+                                        }
+                                        appRegistryModel.AppExeName = exePath;
+                                    }
+                                    if (string.IsNullOrWhiteSpace(appRegistryModel.InstallLocation))
+                                    {
+                                        appRegistryModel.InstallLocation = Path.GetDirectoryName(appRegistryModel.AppExePath);
+                                    }
+                                    installedApps.Add(appRegistryModel);
                                 }
-                                installedApps.Add(appRegistryModel);
                             }
                         }
                     }
                 }
             }
-            using (RegistryKey key = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, registryView))
-            using (RegistryKey subKey = key.OpenSubKey(keyPath))
+            catch (Exception ex)
             {
-                if (subKey != null)
-                {
-                    foreach (string subKeyName in subKey.GetSubKeyNames())
-                    {
-                        using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
-                        {
-                            string displayName = appKey.GetValue("DisplayName") as string;
-                            //if (displayName != null && displayName.Contains("搜狗"))
-                            //{
-
-                            //}
-                            // 排除系统应用 systemComponent == 1
-                            int systemComponent = (int)appKey.GetValue("SystemComponent", 0);
-                            if (systemComponent == 1 || string.IsNullOrWhiteSpace(displayName))
-                            {
-                                continue;
-                            }
-                            if (!installedApps.Any(i => i.AppDisplayName.Equals(displayName)))
-                            {
-                                AppRegistryModel appRegistryModel = new AppRegistryModel();
-                                appRegistryModel.AppDisplayName = displayName;
-                                appRegistryModel.InstallLocation = appKey.GetValue("InstallLocation") as string;
-                                appRegistryModel.AppExePath = appKey.GetValue("DisplayIcon") as string;
-                                appRegistryModel.UnInstallString = appKey.GetValue("UninstallString") as string;
-                                if (!string.IsNullOrWhiteSpace(appRegistryModel.AppExePath))
-                                {
-                                    string exePath = appRegistryModel.AppExePath;
-                                    if (exePath.Contains("\\"))
-                                    {
-                                        exePath = exePath.Split('\\').Last();
-                                    }
-                                    appRegistryModel.AppExeName = exePath;
-                                }
-                                if (string.IsNullOrWhiteSpace(appRegistryModel.InstallLocation))
-                                {
-                                    appRegistryModel.InstallLocation = Path.GetDirectoryName(appRegistryModel.AppExePath);
-                                }
-                                installedApps.Add(appRegistryModel);
-                            }
-                        }
-                    }
-                }
+                TLog.Error($"从注册表获取应用信息出错:{ex.Message}");
             }
-
         }
 
         /// <summary>
@@ -681,8 +635,8 @@ namespace TuShan.CleanDeath.ViewModels
 
         public void ViewModelLoaded()
         {
-            CleanFoldersLoaded();
             GetAllAppNames();
+            CleanFoldersLoaded();
             CleanAppsLoaded();
         }
 
@@ -724,11 +678,10 @@ namespace TuShan.CleanDeath.ViewModels
                 ServiceUtility.StartService();
                 //初始化服务客户端
                 ServiceClientUtility.InitClient();
-                Thread.Sleep(1000);
-                this.TryCloseAsync();
             });
             BusyBorderShow = Visibility.Collapsed;
-
+            MyMessageBox.Show("已开启守护！", CleanDeath.Views.ButtonType.Close, MessageType.Info);
+            await this.TryCloseAsync();
         }
 
         public void ViewModelClosed()
@@ -791,11 +744,11 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public async void StartGuardNow()
         {
-            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
+            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认1", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
             {
                 return;
             }
-            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
+            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认2", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
             {
                 return;
             }
@@ -925,7 +878,7 @@ namespace TuShan.CleanDeath.ViewModels
                     if (file.Contains(".lnk"))
                     {
                         string fileee = GetShortcutTarget(file);
-                        if (cleanDeathSetting.Any(c => c.IsEnable &&( fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName))))
+                        if (cleanDeathSetting.Any(c => c.IsEnable && (fileee.Contains(c.AppExeName) || fileee.Contains(c.AppDisplayName) || file.Contains(c.AppDisplayName))))
                         {
                             File.Delete(file);
                         }
@@ -1180,7 +1133,7 @@ namespace TuShan.CleanDeath.ViewModels
                         using (RegistryKey appKey = subKey.OpenSubKey(subKeyName))
                         {
                             string displayName = appKey.GetValue("DisplayName") as string;
-                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.IsEnable &&  c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
+                            if (!string.IsNullOrWhiteSpace(displayName) && cleanDeathSetting.CleanApps.Any(c => c.IsEnable && c.AppDisplayName != null && displayName.Contains(c.AppDisplayName)))
                             {
                                 needDeletelist.Add(appKey.Name.Replace(LocalMachineName, ""));
                             }
@@ -1231,7 +1184,7 @@ namespace TuShan.CleanDeath.ViewModels
                     {
                         try
                         {
-                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true); // 打开注册表项，第二个参数为 true 表示可写入
+                            RegistryKey deletekey = Registry.LocalMachine.OpenSubKey(appKey, true);
 
                             if (deletekey != null)
                             {
