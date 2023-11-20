@@ -139,11 +139,6 @@
                                         hc:FloatingBlock.Content="添加"
                                         Margin="5,0"
                                         Width="Auto" />
-                                <Button cal:Message.Attach="[Click]=[SaveCleanFolderEvent()]"
-                                        Content="保存"
-                                        hc:FloatingBlock.Content="保存"
-                                        Margin="25,5"
-                                        Width="Auto" />
                             </StackPanel>
                         </Grid>
                     </TabItem>
@@ -246,11 +241,6 @@
                                         Orientation="Horizontal"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
-                                <Button cal:Message.Attach="[Click]=[SaveCleanAppsEvent()]"
-                                        Content="保存"
-                                        hc:FloatingBlock.Content="保存"
-                                        Margin="25,5"
-                                        Width="Auto" />
                             </StackPanel>
                         </Grid>
                     </TabItem>
@@ -283,13 +273,11 @@
                                                   hc:InfoElement.Title="脏数据覆盖次数:"
                                                   cal:Message.Attach="[LostFocus]=[DataWriteTimeLostFocus()]"
                                                   Style="{StaticResource NumericUpDownPlus}" />
-                                <Button HorizontalAlignment="Right"
-                                        Margin="10"
+                                <Button Margin="10"
                                         VerticalAlignment="Bottom"
                                         Background="Red"
                                         cal:Message.Attach="[Click]=[StopCleanDeath()]">停止守护</Button>
-                                <Button HorizontalAlignment="Right"
-                                        Margin="10"
+                                <Button Margin="10"
                                         VerticalAlignment="Bottom"
                                         Background="Red"
                                         cal:Message.Attach="[Click]=[StartGuardNow()]">立即清理</Button>
@@ -308,25 +296,147 @@
                         </TabItem.Resources>
                         <Grid Margin="10,10,10,0"
                               Width="600">
-                            <StackPanel Grid.Row="1"
-                                        Margin="20,10,0,0"
-                                        Width="500">
-                                <TextBlock>版权：Copyright ©  2023</TextBlock>
-                                <TextBlock>版本：V 0.0.0.1        （*后续版本免费更新，请注意查阅商家发布信息）</TextBlock>
-                                <TextBlock>说明：</TextBlock>
-                                <TextBlock> 1.适用于windows10,windows11系统。</TextBlock>
-                                <TextBlock> 2.无广告，不会请求或窃取任何用户数据，可在不联网状态下使用。</TextBlock>
-                                <TextBlock> 3.需要开机自启动权限和部分管理员权限删除数据。</TextBlock>
-                                <TextBlock TextWrapping="Wrap"> 4.通过检测用户登录windows的时间，如果距用户上次结束使用的时间间隔大于用户设置的【检测间隔】时间，
-                                则开始对用户指定的数据或应用进行删除操作。</TextBlock>
-                                <TextBlock> 5.出现无法使用或其他异常情况请及时联系商家。</TextBlock>
-                                <TextBlock>注意事项：</TextBlock>
-                                <TextBlock> 1.删除的文件恢复较为困难，请合理使用。</TextBlock>
-                                <TextBlock> 2.盗版可能会导致电脑文件异常删除，请注意识别。</TextBlock>
-                                <TextBlock>商家信息：</TextBlock>
-                                <TextBlock> 1.抖音店铺名称：涂山科技软件研发</TextBlock>
-                                <TextBlock> 2.商家网站：www.tushankeji.work</TextBlock>
-                            </StackPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Grid.Row="1"
+                                            Margin="20,10,0,0"
+                                            Width="500">
+                                    <StackPanel.Resources>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsReadOnly"
+                                                    Value="True" />
+                                            <Setter Property="BorderThickness"
+                                                    Value="0" />
+                                            <Setter Property="BorderBrush"
+                                                    Value="Transparent" />
+                                        </Style>
+                                    </StackPanel.Resources>
+                                    <!-- 标题 -->
+                                    <TextBox Text="名誉权守护系统"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,10" />
+
+                                    <!-- 概述 -->
+                                    <TextBox Text="概述："
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,5" />
+                                    <TextBox Text="欢迎使用名誉权守护系统！这款软件为您的计算机提供后顾之忧，通过一次全面的删除操作，将浏览器数据记录和指定的应用、文件彻底清除，确保您的隐私得到最大程度的保护。特别设计的功能使得您可以设定在过几天后自动执行删除，以确保在突发情况下，例如突然穿越或意外死亡后，您的隐私数据不会被他人发现。"
+                                             TextWrapping="Wrap"
+                                             Margin="0,0,0,10" />
+                                    <TextBox Text="主要特点："
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,5" />
+                                    <!-- 列举主要特点 -->
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBox Text="• 无需联网：名誉权守护系统完全脱机运行，保障您的隐私安全。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 无广告，无弹窗：为了提供纯粹的使用体验，我们承诺不显示任何广告或弹窗。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 不保存和窃取用户隐私：我们尊重您的隐私权，不会保存或窃取任何个人信息。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 脏数据写入：设置脏数据覆盖次数，可防止大部分的文件恢复程序。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 定时删除功能：设定在未来几天后自动执行删除操作，以确保在意外情况下保护您的隐私数据。"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- 使用说明 -->
+                                    <TextBox Text="使用说明："
+                                               FontWeight="Bold"
+                                               Margin="0,10,0,5" />
+                                    <!-- 列举使用说明 -->
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBox Text="1. 安装程序"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,5" />
+                                        <TextBox Text="双击运行 CleanDeathsetup.exe 安装程序，按照提示完成安装过程。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="2. 启动程序"
+                                                   Margin="0,10,0,5" />
+                                        <TextBox Text="   安装完成后，在桌面上找到 TuShan.CleanDeath 的快捷方式，双击打开程序。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="3. 文件夹选择"
+                                                   Margin="0,10,0,5" />
+                                        <TextBox Text="   在​​文件夹选择页面，您有两种方式添加要删除的文件夹："
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="   • ​​将文件夹直接拖动到页面中。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="   • 点击​​按钮，选择需要删除的文件夹。"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBox Text="4. 软件选择"
+                                                   Margin="0,10,0,5" />
+                                        <TextBox Text="   在​​软件选择页面，同样有两种方式添加要删除的应用："
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="   • 直接拖动软件的快捷方式（.lnk）文件或者运行文件（.exe）文件到页面中。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="   • 输入软件名称，在电脑已安装的程序中进行查找，查找到后点击添加按钮即可。"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBox Text="5. 设置检测间隔时间"
+                                                   Margin="0,10,0,5" />
+                                        <TextBox Text="   在​​设置检测间隔时间页面，调整​​检测间隔时间，以满足您的需求。1天默认为24小时。"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBox Text="6. 启动程序"
+                                                   Margin="0,10,0,5" />
+                                        <TextBox Text="   点击​​启动程序按钮，启动程序开始后台守护。该程序会关闭，并启动一个服务来检测电脑锁屏和解锁状态，不会影响电脑的正常运行速度。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="7. 辅助功能页面"
+                                                   Margin="0,10,0,5" />
+                                        <TextBox Text="   • ​​脏数据写入：通过设置该值，调整删除数据后的脏数据写入次数，以阻止数据恢复。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="   • ​​停止守护：点击该按钮即退出本程序的守护。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="   • ​​立即清理：立即对设置的文件和软件进行删除，方便离职格式化电脑。"
+                                                   TextWrapping="Wrap" />
+                                        <!-- 添加更多详细说明... -->
+                                    </StackPanel>
+
+                                    <!-- 注意事项 -->
+                                    <TextBox Text="注意事项："
+                                               FontWeight="Bold"
+                                               Margin="0,10,0,5" />
+                                    <!-- 列举注意事项 -->
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBox Text="• 请确保在执行清理操作之前保存重要的数据，以免意外删除。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 盗版可能会导致电脑文件异常删除，请注意识别。"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 出现无法使用或其他异常情况请及时联系商家。"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- 说明 -->
+                                    <TextBox Text="说明："
+                                               FontWeight="Bold"
+                                               Margin="0,10,0,5" />
+                                    <!-- 列举说明 -->
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBox Text="• 版权：Copyright © 2023"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 版本：V1.0.0.0 （*后续版本免费更新，请注意查阅商家发布信息）"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 适用于windows10,windows11系统。"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <TextBox Text="商家信息："
+                                               FontWeight="Bold"
+                                               Margin="0,10,0,5" />
+                                    <!-- 列举说明 -->
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBox Text="• 抖音店铺名称：涂山科技软件研发"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox Text="• 商家网站：www.tushankeji.work" />
+                                        <TextBox Text="• 商家QQ：2422794558" />
+                                    </StackPanel>
+                                    <TextBox Text="希望名誉权守护系统能够为您提供一次全面的、便捷、高效的电脑保护服务。如有其他问题或需要进一步的说明，随时与我们联系。感谢您选择名誉权守护系统！"
+                                               TextWrapping="Wrap"
+                                               Margin="0,20,0,20" />
+
+                                </StackPanel>
+                            </ScrollViewer>
                         </Grid>
                     </TabItem>
                 </TabControl>
@@ -378,7 +488,7 @@
                         Margin="0,10,10,10"
                         SizeChanged="StackPanel_SizeChanged" />
         </ScrollViewer>
-        <Border Grid.RowSpan="3"
+        <!--<Border Grid.RowSpan="3"
                 Visibility="{Binding BusyBorderShow}"
                 Background="{StaticResource MainContentForegroundBrush}"
                 Opacity="0.9">
@@ -396,6 +506,6 @@
                                 Foreground="BlueViolet"
                                 Style="{StaticResource LoadingLineLarge}" />
             </StackPanel>
-        </Border>
+        </Border>-->
     </Grid>
 </Window>

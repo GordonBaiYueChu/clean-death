@@ -646,13 +646,17 @@ namespace TuShan.CleanDeath.ViewModels
             {
                 return;
             }
-            if (e.AddedItems != null && e.AddedItems.Count > 0 && e.AddedItems[0].GetType().Name == "TabItem")
+            if (e.RemovedItems != null && e.RemovedItems.Count > 0 && e.RemovedItems[0].GetType().Name == "TabItem")
             {
-                //System.Windows.Controls.TabItem tabAddItem = e.AddedItems[0] as System.Windows.Controls.TabItem;
-                //if (tabAddItem.Header.ToString() == "软件设置")
-                //{
-                //    InfoMessageShow("仅支持64位系统");
-                //}
+                System.Windows.Controls.TabItem tabAddItem = e.RemovedItems[0] as System.Windows.Controls.TabItem;
+                if (tabAddItem.Header.ToString() == "文件夹选择")
+                {
+                    SaveCleanFolderEvent();
+                }
+                else if (tabAddItem.Header.ToString() == "软件选择")
+                {
+                    SaveCleanAppsEvent();
+                }
             }
         }
 
@@ -661,7 +665,10 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public async void StartGuard()
         {
-            if (MessageBoxResult.No == MyMessageBox.Show($"已保存所有设置？\r\n*将每隔{MaxTimeOutDay}天进行用户活跃检查", CleanDeath.Views.ButtonType.YesNo, MessageType.Question))
+            SaveCleanFolderEvent();
+            SaveCleanAppsEvent();
+            DateTime checkTime =  DateTime.Now.AddDays(MaxTimeOutDay);
+            if (MessageBoxResult.No == MyMessageBox.Show($"将每隔{MaxTimeOutDay}天进行用户活跃检查,下次检查时间为{checkTime.ToString()}", CleanDeath.Views.ButtonType.YesNo, MessageType.Question))
             {
                 return;
             }
@@ -744,11 +751,13 @@ namespace TuShan.CleanDeath.ViewModels
         /// </summary>
         public async void StartGuardNow()
         {
-            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认1", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
+            SaveCleanFolderEvent();
+            SaveCleanAppsEvent();
+            if (MessageBoxResult.Cancel == MyMessageBox.Show($"将会立刻开始清理且无法撤回，请确认", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
             {
                 return;
             }
-            if (MessageBoxResult.Cancel == MyMessageBox.Show($"已保存所有设置？\r\n将会立刻开始删除，请确认2", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
+            if (MessageBoxResult.Cancel == MyMessageBox.Show($"将会立刻开始清理且无法撤回，请再次确认！", CleanDeath.Views.ButtonType.OKCancel, MessageType.Question))
             {
                 return;
             }
@@ -760,7 +769,6 @@ namespace TuShan.CleanDeath.ViewModels
             });
             BusyBorderShow = Visibility.Collapsed;
             InfoMessageShow("已完成清理");
-
         }
 
         #region 立即删除逻辑
