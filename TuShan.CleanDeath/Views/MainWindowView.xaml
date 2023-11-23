@@ -309,6 +309,8 @@
                                                     Value="0" />
                                             <Setter Property="BorderBrush"
                                                     Value="Transparent" />
+                                            <Setter Property="FontSize"
+                                                    Value="14" />
                                         </Style>
                                     </StackPanel.Resources>
                                     <!-- 标题 -->
@@ -321,7 +323,7 @@
                                     <TextBox Text="概述："
                                                FontWeight="Bold"
                                                Margin="0,0,0,5" />
-                                    <TextBox Text="欢迎使用名誉权守护系统！这款软件为您的计算机提供后顾之忧，通过一次全面的删除操作，将浏览器数据记录和指定的应用、文件彻底清除，确保您的隐私得到最大程度的保护。特别设计的功能使得您可以设定在过几天后自动执行删除，以确保在突发情况下，例如突然穿越或意外死亡后，您的隐私数据不会被他人发现。"
+                                    <TextBox Text="欢迎使用名誉权守护系统！这款软件旨在为您的计算机提供全面的隐私保护，通过一次全面的删除操作，将浏览器数据记录和指定的应用、文件彻底清除，确保您的隐私得到最大程度的保护。特别设计的功能，您可设置在电脑未使用的几天后自动执行删除，以确保在突发情况下，例如突然穿越或意外死亡后，您的隐私数据不会被他人发现。"
                                              TextWrapping="Wrap"
                                              Margin="0,0,0,10" />
                                     <TextBox Text="主要特点："
@@ -354,7 +356,7 @@
                                                    TextWrapping="Wrap" />
                                         <TextBox Text="2. 启动程序"
                                                    Margin="0,10,0,5" />
-                                        <TextBox Text="   安装完成后，在桌面上找到 TuShan.CleanDeath 的快捷方式，双击打开程序。"
+                                        <TextBox Text="   安装完成后，在桌面上找到【名誉权守护系统】的快捷方式，双击打开程序。"
                                                    TextWrapping="Wrap" />
                                         <TextBox Text="3. 文件夹选择"
                                                    Margin="0,10,0,5" />
@@ -362,7 +364,7 @@
                                                    TextWrapping="Wrap" />
                                         <TextBox Text="   • ​​将文件夹直接拖动到页面中。"
                                                    TextWrapping="Wrap" />
-                                        <TextBox Text="   • 点击​​按钮，选择需要删除的文件夹。"
+                                        <TextBox Text="   • 点击​​添加按钮，选择需要删除的文件夹。"
                                                    TextWrapping="Wrap" />
 
                                         <TextBox Text="4. 软件选择"
@@ -376,9 +378,8 @@
 
                                         <TextBox Text="5. 设置检测间隔时间"
                                                    Margin="0,10,0,5" />
-                                        <TextBox Text="   在​​设置检测间隔时间页面，调整​​检测间隔时间，以满足您的需求。1天默认为24小时。"
-                                                   TextWrapping="Wrap" />
-
+                                        <TextBox Text="   在主页面，调整检测间隔时间，以满足您的需求。1天默认为24小时。"
+                                                 TextWrapping="Wrap" />
                                         <TextBox Text="6. 启动程序"
                                                    Margin="0,10,0,5" />
                                         <TextBox Text="   点击​​启动程序按钮，启动程序开始后台守护。该程序会关闭，并启动一个服务来检测电脑锁屏和解锁状态，不会影响电脑的正常运行速度。"
@@ -488,7 +489,7 @@
                         Margin="0,10,10,10"
                         SizeChanged="StackPanel_SizeChanged" />
         </ScrollViewer>
-        <!--<Border Grid.RowSpan="3"
+        <Border Grid.RowSpan="3"
                 Visibility="{Binding BusyBorderShow}"
                 Background="{StaticResource MainContentForegroundBrush}"
                 Opacity="0.9">
@@ -506,6 +507,6 @@
                                 Foreground="BlueViolet"
                                 Style="{StaticResource LoadingLineLarge}" />
             </StackPanel>
-        </Border>-->
+        </Border>
     </Grid>
 </Window>
